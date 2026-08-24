@@ -1,6 +1,6 @@
 # MindSpace — Project Memory
 
-> **Version**: 1.1 — August 2026
+> **Version**: 1.2 — August 2026
 > **Last Updated**: August 24, 2026
 
 ---
@@ -25,7 +25,11 @@ This file maintains context across development sessions. It records important de
 | Project Memory | ✅ Complete | Aug 24, 2026 |
 | .gitignore | ✅ Complete | Aug 24, 2026 |
 | CONTRIBUTING.md | ✅ Complete | Aug 24, 2026 |
-| Flutter Project Setup | ⏳ Not Started | — |
+| GitHub Actions CI/CD | ✅ Complete | Aug 24, 2026 |
+| Supabase Edge Functions | ✅ Complete | Aug 24, 2026 |
+| Localization (ARB) | ✅ Complete | Aug 24, 2026 |
+| GitHub Templates | ✅ Complete | Aug 24, 2026 |
+| Flutter Project Setup | ⏳ Waiting for Flutter install | — |
 | Phase 1: Authentication | ⏳ Not Started | — |
 | Phase 2: Dashboard | ⏳ Not Started | — |
 | Phase 3: Viewer + Annotations | ⏳ Not Started | — |
@@ -91,15 +95,24 @@ This file maintains context across development sessions. It records important de
 - [x] PR #1 merged to main (3 files, +501 lines)
 - [x] Main branch updated with all planning documents
 
+### August 24, 2026 — Infrastructure & Backend
+- [x] Created GitHub Actions CI/CD workflow (lint, test, build)
+- [x] Created Supabase Edge Functions (summarize, chat, extract-text, rate-limit)
+- [x] Created English localization ARB file (200+ strings)
+- [x] Created env.dart.example with app configuration template
+- [x] Created GitHub issue templates (bug report, feature request)
+- [x] Created PR template with checklist
+- [x] Pushed to feature/phase1-flutter-setup branch
+
 ---
 
 ## Currently Working On
 
-**Current Phase**: Pre-development (planning complete)
-**Current Branch**: main (up to date with remote)
-**Next Step**: Set up Flutter project (Phase 1, Task 1.1)
-**Blockers**: None
-**Notes**: All planning documents are ready. Repository is set up on GitHub. PR #1 merged. Ready to begin Flutter project initialization.
+**Current Phase**: Pre-development (infrastructure complete)
+**Current Branch**: feature/phase1-flutter-setup (awaiting Flutter install)
+**Next Step**: Install Flutter → Initialize project → Set up folder structure
+**Blockers**: Flutter SDK not yet installed on development machine
+**Notes**: All planning docs and infrastructure ready. PR pending for Edge Functions, CI/CD, localization. Waiting for Flutter install to proceed with Phase 1.
 
 ---
 
@@ -111,6 +124,7 @@ This file maintains context across development sessions. It records important de
 | Aug 24, 2026 | Repository initialized on GitHub | Remote origin configured; ready for collaboration |
 | Aug 24, 2026 | Added .gitignore and CONTRIBUTING.md | Repository now properly configured for Flutter development |
 | Aug 24, 2026 | PR #1 merged to main | .gitignore, CONTRIBUTING.md, and memory.md updates merged |
+| Aug 24, 2026 | Added CI/CD, Edge Functions, localization | 10 files, +1,339 lines on feature/phase1-flutter-setup |
 
 ---
 
@@ -159,3 +173,4 @@ This file maintains context across development sessions. It records important de
 |---|---|---|
 | 1.0 | Aug 24, 2026 | Initial project memory created with all planning decisions documented |
 | 1.1 | Aug 24, 2026 | Updated with repository setup status and new files (.gitignore, CONTRIBUTING.md) |
+| 1.2 | Aug 24, 2026 | Added infrastructure: CI/CD, Edge Functions, localization, GitHub templates |
