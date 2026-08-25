@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/transitions/page_transitions.dart';
 import '../features/auth/presentation/providers/auth_provider.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -27,10 +28,42 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/login', name: 'login', builder: (ctx, s) => const LoginScreen()),
-      GoRoute(path: '/signup', name: 'signup', builder: (ctx, s) => const SignupScreen()),
-      GoRoute(path: '/forgot-password', name: 'forgotPassword', builder: (ctx, s) => const ForgotPasswordScreen()),
-      GoRoute(path: '/dashboard', name: 'dashboard', builder: (ctx, s) => const DashboardScreen()),
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        pageBuilder: (ctx, s) => CustomTransitionPage(
+          child: const LoginScreen(),
+          transitionsBuilder: fadeSlideUpTransition,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+      GoRoute(
+        path: '/signup',
+        name: 'signup',
+        pageBuilder: (ctx, s) => CustomTransitionPage(
+          child: const SignupScreen(),
+          transitionsBuilder: fadeSlideRightTransition,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgotPassword',
+        pageBuilder: (ctx, s) => CustomTransitionPage(
+          child: const ForgotPasswordScreen(),
+          transitionsBuilder: fadeSlideRightTransition,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        name: 'dashboard',
+        pageBuilder: (ctx, s) => CustomTransitionPage(
+          child: const DashboardScreen(),
+          transitionsBuilder: fadeSlideUpTransition,
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ),
     ],
   );
 });
