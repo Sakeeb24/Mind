@@ -1,0 +1,94 @@
+name: mindspace
+description: "MindSpace — A free, AI-powered document intelligence and study assistant for students."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Code Generation (models)
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+
+  # Local Database (Hive Community Edition)
+  hive_ce: ^2.19.3
+  hive_ce_flutter: ^2.3.4
+
+  # Secure Storage
+  flutter_secure_storage: ^9.2.4
+
+  # PDF Rendering
+  pdfx: ^2.6.0
+
+  # Networking
+  dio: ^5.8.0+1
+
+  # File Handling
+  file_picker: ^8.1.7
+  path_provider: ^2.1.5
+  share_plus: ^10.1.4
+
+  # Image Caching
+  cached_network_image: ^3.4.1
+
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+
+  # Connectivity
+  connectivity_plus: ^6.1.3
+
+  # App Info
+  package_info_plus: ^8.1.3
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Supabase
+  supabase_flutter: ^2.8.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Linting
+  flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.4.14
+  freezed: ^3.0.4
+  json_serializable: ^6.9.4
+  hive_ce_generator: ^1.9.2
+  riverpod_generator: ^2.6.3
+
+  # Testing
+  mockito: ^5.4.5
+  golden_toolkit: ^0.15.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  # fonts:
+  #   - family: Inter
+  #     fonts:
+  #       - asset: assets/fonts/Inter-Regular.ttf
+  #         weight: 400
+  #       - asset: assets/fonts/Inter-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Inter-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Inter-Bold.ttf
+  #         weight: 700
