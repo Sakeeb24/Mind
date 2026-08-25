@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mindspace/config/theme.dart';
+import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
 import 'package:mindspace/features/auth/presentation/widgets/auth_form.dart';
@@ -50,48 +51,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const SizedBox(height: AppSpacing.xxl),
 
-              // Logo
-              Semantics(label: 'MindSpace logo', child: const Icon(Icons.menu_book_rounded, size: 72, color: AppColors.primary)),
+              // Logo — fades in first
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: Semantics(label: 'MindSpace logo', child: const Icon(Icons.menu_book_rounded, size: 72, color: AppColors.primary)),
+              ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Title — Taste Skill: Bold hierarchy
-              Text(
-                'Welcome Back',
-                style: AppTypography.display,
-                textAlign: TextAlign.center,
+              // Title
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 200),
+                child: Text(
+                  'Welcome Back',
+                  style: AppTypography.display,
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // Subtitle — Taste Skill: Calm secondary tone
-              Text(
-                'Sign in to continue studying',
-                style: AppTypography.bodyLarge.copyWith(
-                  color: AppColors.lightTextSecondary,
+              // Subtitle
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 250),
+                child: Text(
+                  'Sign in to continue studying',
+                  style: AppTypography.bodyLarge.copyWith(color: AppColors.lightTextSecondary),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // Form
-              AuthForm(
-                onSubmit: (email, password, _) {
-                  _email = email;
-                  _password = password;
-                  _handleEmailSignIn();
-                },
-                submitLabel: 'Sign In',
+              // Form — slides up
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 350),
+                child: AuthForm(
+                  onSubmit: (email, password, _) {
+                    _email = email;
+                    _password = password;
+                    _handleEmailSignIn();
+                  },
+                  submitLabel: 'Sign In',
+                ),
               ),
 
-              // Forgot password — Taste Skill: Intentional color
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => context.push('/forgot-password'),
-                  child: Text(
-                    'Forgot password\u2026',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.primary,
+              // Forgot password
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 400),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: Text(
+                      'Forgot password\u2026',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.primary),
                     ),
                   ),
                 ),
@@ -100,43 +112,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.md),
 
               // Primary CTA
-              AppButton(
-                onPressed: _isLoading ? null : _handleEmailSignIn,
-                label: 'Sign In',
-                isLoading: _isLoading,
-                isExpanded: true,
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 450),
+                child: AppButton(
+                  onPressed: _isLoading ? null : _handleEmailSignIn,
+                  label: 'Sign In',
+                  isLoading: _isLoading,
+                  isExpanded: true,
+                ),
               ),
 
               const SizedBox(height: AppSpacing.lg),
 
               // Social login
-              SocialLoginButtons(
-                onGoogleTap: _handleGoogleSignIn,
-                isLoading: _isLoading,
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 500),
+                child: SocialLoginButtons(
+                  onGoogleTap: _handleGoogleSignIn,
+                  isLoading: _isLoading,
+                ),
               ),
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Sign up link — Taste Skill: Subtle with purpose
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.lightTextSecondary,
+              // Sign up link
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 550),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account? ",
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextSecondary),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () => context.push('/signup'),
-                    child: Text(
-                      'Sign Up',
-                      style: AppTypography.titleMedium.copyWith(
-                        color: AppColors.primary,
+                    TextButton(
+                      onPressed: () => context.push('/signup'),
+                      child: Text(
+                        'Sign Up',
+                        style: AppTypography.titleMedium.copyWith(color: AppColors.primary),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

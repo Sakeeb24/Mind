@@ -28,7 +28,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/login', name: 'login', builder: (ctx, s) => const LoginScreen()),
-      GoRoute(path: '/signup', name: 'signup', builder: (ctx, s) => const SignUpScreen()),
+      GoRoute(path: '/signup', name: 'signup', builder: (ctx, s) => const SignupScreen()),
       GoRoute(path: '/forgot-password', name: 'forgotPassword', builder: (ctx, s) => const ForgotPasswordScreen()),
       GoRoute(path: '/dashboard', name: 'dashboard', builder: (ctx, s) => const DashboardScreen()),
     ],

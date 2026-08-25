@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mindspace/config/theme.dart';
 import 'package:mindspace/core/utils/validators.dart';
+import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/core/widgets/app_text_field.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
@@ -25,104 +27,142 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-      ref.read(authProvider.notifier).sendPasswordResetEmail(
-            _emailController.text.trim(),
-          );
-    }
+  void _handleResetPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    await ref.read(authProvider.notifier).sendPasswordResetEmail(_emailController.text);
+    setState(() {
+      _isLoading = false;
+      _emailSent = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.status == AuthStatus.unauthenticated && _isLoading) {
-        setState(() {
-          _isLoading = false;
-          _emailSent = true;
-        });
-      } else if (next.status == AuthStatus.error) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage ?? 'Failed to send reset email'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    });
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _emailSent
-              ? Column(
-                  children: [
-                    const SizedBox(height: 60),
-                    const Icon(Icons.mark_email_read_outlined, size: 80, color: AppColors.success),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Check your email',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                      textAlign: TextAlign.center,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Icon
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 100),
+                child: const Icon(Icons.lock_reset, size: 64, color: AppColors.primary),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Title
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 200),
+                child: Text(
+                  _emailSent ? 'Check Your Email' : 'Reset Password',
+                  style: AppTypography.headlineLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+
+              // Subtitle
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 250),
+                child: Text(
+                  _emailSent
+                      ? 'We sent a password reset link to ${_emailController.text}'
+                      : "Enter your email and we'll send you a reset link",
+                  style: AppTypography.bodyLarge.copyWith(color: AppColors.lightTextSecondary),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.xxl),
+
+              if (!_emailSent) ...[
+                // Email form
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 350),
+                  child: Form(
+                    key: _formKey,
+                    child: AppTextField(
+                      controller: _emailController,
+                      label: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      validator: Validators.email,
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'We sent a password reset link to ${_emailController.text}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.lightTextSecondary,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    AppButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      label: 'Back to Sign In',
-                      isExpanded: true,
-                    ),
-                  ],
-                )
-              : Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 60),
-                      const Icon(Icons.lock_outline, size: 80, color: AppColors.primary),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Forgot Password?',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Enter your email and we\'ll send you a reset link.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.lightTextSecondary,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 48),
-                      AppTextField(
-                        controller: _emailController,
-                        label: 'Email',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: Validators.email,
-                      ),
-                      const SizedBox(height: 24),
-                      AppButton(
-                        onPressed: _isLoading ? null : _handleSubmit,
-                        label: 'Send Reset Link',
-                        isLoading: _isLoading,
-                        isExpanded: true,
-                      ),
-                    ],
                   ),
                 ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Reset button
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 450),
+                  child: AppButton(
+                    onPressed: _isLoading ? null : _handleResetPassword,
+                    label: 'Send Reset Link',
+                    isLoading: _isLoading,
+                    isExpanded: true,
+                  ),
+                ),
+              ] else ...[
+                // Success state
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 350),
+                  child: AppButton(
+                    onPressed: () => context.go('/login'),
+                    label: 'Back to Sign In',
+                    isExpanded: true,
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                AnimatedFadeIn(
+                  delay: const Duration(milliseconds: 450),
+                  child: TextButton(
+                    onPressed: () => setState(() => _emailSent = false),
+                    child: Text(
+                      'Try a different email',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: AppSpacing.xl),
+
+              // Back to login
+              AnimatedFadeIn(
+                delay: const Duration(milliseconds: 500),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Remember your password? ',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextSecondary),
+                    ),
+                    TextButton(
+                      onPressed: () => context.pop(),
+                      child: Text(
+                        'Sign In',
+                        style: AppTypography.titleMedium.copyWith(color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

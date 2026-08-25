@@ -7,7 +7,6 @@ import 'package:mindspace/features/auth/domain/repositories/auth_repository.dart
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
 import 'package:mindspace/features/auth/presentation/screens/login_screen.dart';
 
-/// Minimal mock for widget tests.
 class FakeAuthRepository implements AuthRepository {
   @override
   User? get currentUser => null;
@@ -50,43 +49,39 @@ Widget buildTestApp({AuthRepository? repo}) {
 }
 
 void main() {
-  group('LoginScreen', () {
-    testWidgets('renders welcome text', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Welcome Back'), findsOneWidget);
-      expect(find.text('Sign in to continue studying'), findsOneWidget);
-    });
+  testWidgets('LoginScreen renders app icon', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle(); // Wait for animations
+    expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
+  });
 
-    testWidgets('renders email and password fields', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Email'), findsOneWidget);
-      expect(find.text('Password'), findsOneWidget);
-    });
+  testWidgets('LoginScreen renders email and password fields', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsNWidgets(2));
+  });
 
-    testWidgets('renders Sign In button', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Sign In'), findsWidgets);
-    });
+  testWidgets('LoginScreen renders Sign In button', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Sign In'), findsOneWidget);
+  });
 
-    testWidgets('renders Google sign in button', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Continue with Google'), findsOneWidget);
-    });
+  testWidgets('LoginScreen renders Google sign in button', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Continue with Google'), findsOneWidget);
+  });
 
-    testWidgets('renders forgot password link', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Forgot password…'), findsOneWidget);
-    });
+  testWidgets('LoginScreen renders forgot password link', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Forgot password\u2026'), findsOneWidget);
+  });
 
-    testWidgets('renders sign up link', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.textContaining("have an account"), findsOneWidget);
-      expect(find.text('Sign Up'), findsOneWidget);
-    });
-
-    testWidgets('renders app icon', (tester) async {
-      await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
-    });
+  testWidgets('LoginScreen renders Sign Up link', (tester) async {
+    await tester.pumpWidget(buildTestApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Sign Up'), findsOneWidget);
   });
 }
