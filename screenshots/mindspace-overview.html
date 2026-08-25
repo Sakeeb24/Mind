@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSpace — Project Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 24px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 24px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: #16213e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #6366f1; }
+  .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+  .card { background: #16213e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .card-title { font-size: 18px; font-weight: 600; color: #fff; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+  .pill-info { background: rgba(99,102,241,0.2); color: #818cf8; }
+  .pill-success { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .pill-neutral { background: rgba(100,116,139,0.2); color: #94a3b8; }
+  .phase-row { margin-bottom: 14px; }
+  .phase-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .phase-name { font-weight: 500; font-size: 14px; }
+  .phase-meta { display: flex; gap: 8px; align-items: center; }
+  .phase-weeks { color: #888; font-size: 12px; }
+  .progress-bar { height: 8px; background: #2a2a4a; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px; color: #888; font-weight: 500; border-bottom: 1px solid #2a2a4a; font-size: 12px; }
+  td { padding: 8px; border-bottom: 1px solid #1e1e3a; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+  .accent { color: #818cf8; }
+  .secondary { color: #94a3b8; }
+  .tertiary { color: #64748b; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>MindSpace — Project Dashboard</h1>
+  <p class="subtitle">Flutter AI Study Assistant · 8-week roadmap · 26 Dart files · 6 commits</p>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-value">26</div><div class="stat-label">Dart Files</div></div>
+    <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Feature Modules</div></div>
+    <div class="stat-card"><div class="stat-value">1</div><div class="stat-label">Built (auth)</div></div>
+    <div class="stat-card"><div class="stat-value">24</div><div class="stat-label">Dependencies</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Phase Progress</span>
+      <span class="pill pill-info">Week 1 of 8</span>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">Login & Authentication</span>
+        <div class="phase-meta"><span class="phase-weeks">Week 1</span><span class="pill pill-info">In Progress</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:70%; background:#6366f1;"></div></div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">Dashboard</span>
+        <div class="phase-meta"><span class="phase-weeks">Week 2</span><span class="pill pill-neutral">Pending</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#2a2a4a;"></div></div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">Document Viewer & Annotations</span>
+        <div class="phase-meta"><span class="phase-weeks">Weeks 3–4</span><span class="pill pill-neutral">Pending</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#2a2a4a;"></div></div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">AI Features</span>
+        <div class="phase-meta"><span class="phase-weeks">Weeks 5–6</span><span class="pill pill-neutral">Pending</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#2a2a4a;"></div></div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">Testing & QA</span>
+        <div class="phase-meta"><span class="phase-weeks">Week 7</span><span class="pill pill-neutral">Pending</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#2a2a4a;"></div></div>
+    </div>
+    <div class="phase-row">
+      <div class="phase-header">
+        <span class="phase-name">Deployment</span>
+        <div class="phase-meta"><span class="phase-weeks">Week 8</span><span class="pill pill-neutral">Pending</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background:#2a2a4a;"></div></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Feature Modules</span></div>
+      <table>
+        <tr><th>Module</th><th>Files</th><th>Status</th></tr>
+        <tr><td><strong>auth</strong></td><td class="secondary">10</td><td><span class="pill pill-success">Built</span></td></tr>
+        <tr><td>dashboard</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>document_viewer</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>annotations</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>ai_chat</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>summarization</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>folders</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+        <tr><td>settings</td><td class="tertiary">—</td><td><span class="pill pill-neutral">Empty</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Core Library</span></div>
+      <table>
+        <tr><th>Category</th><th>Count</th><th>Files</th></tr>
+        <tr><td><strong>Config</strong></td><td class="secondary">4</td><td class="tertiary">env, constants, theme, routes</td></tr>
+        <tr><td><strong>Errors</strong></td><td class="secondary">2</td><td class="tertiary">app_exception, error_handler</td></tr>
+        <tr><td><strong>Utils</strong></td><td class="secondary">2</td><td class="tertiary">validators, debouncer</td></tr>
+        <tr><td><strong>Widgets</strong></td><td class="secondary">6</td><td class="tertiary">button, text_field, loading, empty, error, dialog</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Commits</span>
+      <span class="tertiary">Source: Git log · Aug 24, 2026</span>
+    </div>
+    <table>
+      <tr><th>Hash</th><th>Message</th><th>Date</th></tr>
+      <tr><td class="mono accent">6fbf4f8</td><td>Update memory.md with session progress</td><td class="tertiary">Aug 24</td></tr>
+      <tr><td class="mono accent">a007f96</td><td>Add CI/CD, Edge Functions, localization, GitHub templates</td><td class="tertiary">Aug 24</td></tr>
+      <tr><td class="mono accent">5d82e35</td><td>Update memory.md with PR #1 merge status</td><td class="tertiary">Aug 24</td></tr>
+      <tr><td class="mono accent">8fbc4e2</td><td>Merge PR #1 from autopilot/mindspace-fixes</td><td class="tertiary">Aug 24</td></tr>
+      <tr><td class="mono accent">358fc94</td><td>Add .gitignore, CONTRIBUTING.md</td><td class="tertiary">Aug 24</td></tr>
+      <tr><td class="mono accent">b062e8f</td><td>Initial planning documents</td><td class="tertiary">Aug 24</td></tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>
