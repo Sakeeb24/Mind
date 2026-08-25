@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mindspace/features/document_viewer/presentation/screens/document_viewer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindspace/config/theme.dart';
+import 'package:mindspace/core/services/file_upload_service.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/core/widgets/app_text_field.dart';
 import 'package:mindspace/core/widgets/confirm_dialog.dart';
@@ -58,22 +59,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  Future<void> _handleUpload() async {
+    Navigator.pop(context); // Close dialog
+    final result = await FileUploadService.pickPdf();
+    if (result != null) {
+      final doc = await FileUploadService.processUpload(result);
+      if (doc != null) {
+        ref.read(dashboardProvider.notifier).addDocument(doc);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Uploaded ${doc.title}'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   void _showUploadDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Upload PDF'),
-        content: const Text('Select a PDF file from your device. This will open the file picker.'),
+        content: const Text('Select a PDF file from your device.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement file_picker integration
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('File picker integration coming soon')),
-              );
-            },
+            onPressed: _handleUpload,
             child: const Text('Select File'),
           ),
         ],
