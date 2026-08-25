@@ -16,44 +16,48 @@ class DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Thumbnail placeholder
-            Expanded(
-              child: Container(
-                color: AppColors.lightSurface,
-                child: const Center(
-                  child: Icon(Icons.picture_as_pdf, size: 48, color: AppColors.error),
+    return Semantics(
+      label: 'Document: ${document.title}',
+      button: true,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Thumbnail placeholder
+              Expanded(
+                child: Container(
+                  color: AppColors.lightSurface,
+                  child: const Center(
+                    child: Icon(Icons.picture_as_pdf, size: 48, color: AppColors.error),
+                  ),
                 ),
               ),
-            ),
-            // Info
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    document.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${document.pageCount} pages · ${document.fileSizeFormatted}',
-                    style: TextStyle(color: AppColors.lightTextTertiary, fontSize: 11),
-                  ),
-                ],
+              // Info
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      document.title,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${document.pageCount} pages · ${document.fileSizeFormatted}',
+                      style: TextStyle(color: AppColors.lightTextTertiary, fontSize: 11),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

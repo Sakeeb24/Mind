@@ -1,32 +1,33 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:filesize/filesize.dart';
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
 
 void main() {
   final fixedDate = DateTime.utc(2024);
 
   group('Document', () {
-    test('fileSizeFormatted formats bytes correctly', () {
-      final doc = Document(
-        id: '1', title: 'Test', fileName: 'test.pdf', filePath: '/test.pdf',
-        fileSizeBytes: 500, createdAt: fixedDate,
-      );
-      expect(doc.fileSizeFormatted, '500 B');
-    });
-
-    test('fileSizeFormatted formats KB correctly', () {
+    test('fileSizeFormatted delegates to filesize package', () {
       final doc = Document(
         id: '1', title: 'Test', fileName: 'test.pdf', filePath: '/test.pdf',
         fileSizeBytes: 1536, createdAt: fixedDate,
       );
-      expect(doc.fileSizeFormatted, '1.5 KB');
+      expect(doc.fileSizeFormatted, filesize(1536));
     });
 
-    test('fileSizeFormatted formats MB correctly', () {
+    test('fileSizeFormatted formats zero bytes', () {
+      final doc = Document(
+        id: '1', title: 'Test', fileName: 'test.pdf', filePath: '/test.pdf',
+        fileSizeBytes: 0, createdAt: fixedDate,
+      );
+      expect(doc.fileSizeFormatted, filesize(0));
+    });
+
+    test('fileSizeFormatted formats large file', () {
       final doc = Document(
         id: '1', title: 'Test', fileName: 'test.pdf', filePath: '/test.pdf',
         fileSizeBytes: 2621440, createdAt: fixedDate,
       );
-      expect(doc.fileSizeFormatted, '2.5 MB');
+      expect(doc.fileSizeFormatted, filesize(2621440));
     });
 
     test('copyWith preserves unchanged fields', () {

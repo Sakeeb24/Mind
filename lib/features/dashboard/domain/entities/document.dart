@@ -1,3 +1,5 @@
+import 'package:filesize/filesize.dart';
+
 class Document {
   const Document({
     required this.id,
@@ -48,11 +50,7 @@ class Document {
     );
   }
 
-  String get fileSizeFormatted {
-    if (fileSizeBytes < 1024) return '$fileSizeBytes B';
-    if (fileSizeBytes < 1024 * 1024) return '${(fileSizeBytes / 1024).toStringAsFixed(1)} KB';
-    return '${(fileSizeBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
+  String get fileSizeFormatted => filesize(fileSizeBytes);
 
   @override
   bool operator ==(Object other) =>

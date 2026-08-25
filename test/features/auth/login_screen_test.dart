@@ -75,7 +75,7 @@ void main() {
 
     testWidgets('renders forgot password link', (tester) async {
       await tester.pumpWidget(buildTestApp(repo: FakeAuthRepository()));
-      expect(find.text('Forgot password?'), findsOneWidget);
+      expect(find.text('Forgot password…'), findsOneWidget);
     });
 
     testWidgets('renders sign up link', (tester) async {

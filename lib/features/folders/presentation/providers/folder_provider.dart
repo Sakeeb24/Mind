@@ -5,17 +5,15 @@ import 'package:mindspace/features/folders/data/repositories/hive_folder_reposit
 import 'package:mindspace/features/folders/domain/entities/folder.dart';
 import 'package:mindspace/features/folders/domain/repositories/folder_repository.dart';
 
-/// Provider for the folder repository.
 final folderRepositoryProvider = Provider<FolderRepository>((ref) {
   final box = Hive.box(AppConstants.foldersBox);
   return HiveFolderRepository(box);
 });
 
-/// Folder notifier managing CRUD operations.
 class FolderNotifier extends Notifier<List<Folder>> {
   @override
   List<Folder> build() {
-    _loadFolders();
+    Future.microtask(() => _loadFolders());
     return [];
   }
 

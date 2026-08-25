@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mindspace/config/constants.dart';
@@ -7,16 +5,13 @@ import 'package:mindspace/features/dashboard/data/repositories/hive_document_rep
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
 import 'package:mindspace/features/dashboard/domain/repositories/document_repository.dart';
 
-/// Provider for the document repository.
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   final box = Hive.box(AppConstants.documentsBox);
   return HiveDocumentRepository(box);
 });
 
-/// Sort option for documents.
 enum SortOption { recent, name, dateAdded, size }
 
-/// Dashboard state.
 class DashboardState {
   const DashboardState({
     this.documents = const [],
@@ -34,20 +29,14 @@ class DashboardState {
 
   List<Document> get filteredDocuments {
     var docs = List<Document>.from(documents);
-
-    // Filter by folder
     if (selectedFolderId != null) {
       docs = docs.where((d) => d.folderId == selectedFolderId).toList();
     } else {
       docs = docs.where((d) => d.folderId == null).toList();
     }
-
-    // Filter by search
     if (searchQuery.isNotEmpty) {
       docs = docs.where((d) => d.title.toLowerCase().contains(searchQuery.toLowerCase())).toList();
     }
-
-    // Sort
     switch (sortOption) {
       case SortOption.recent:
         docs.sort((a, b) => (b.lastOpenedAt ?? b.createdAt).compareTo(a.lastOpenedAt ?? a.createdAt));
@@ -58,7 +47,6 @@ class DashboardState {
       case SortOption.size:
         docs.sort((a, b) => b.fileSizeBytes.compareTo(a.fileSizeBytes));
     }
-
     return docs;
   }
 
@@ -80,11 +68,10 @@ class DashboardState {
   }
 }
 
-/// Dashboard notifier.
 class DashboardNotifier extends Notifier<DashboardState> {
   @override
   DashboardState build() {
-    _loadDocuments();
+    Future.microtask(() => _loadDocuments());
     return const DashboardState();
   }
 

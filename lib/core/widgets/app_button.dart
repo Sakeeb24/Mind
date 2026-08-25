@@ -23,10 +23,14 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = isLoading
-        ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+        ? Semantics(
+            liveRegion: true,
+            label: 'Loading',
+            child: const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,

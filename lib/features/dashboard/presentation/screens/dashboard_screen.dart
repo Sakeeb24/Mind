@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mindspace/features/document_viewer/presentation/screens/document_viewer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindspace/config/theme.dart';
+import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/core/widgets/app_text_field.dart';
 import 'package:mindspace/core/widgets/confirm_dialog.dart';
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
@@ -92,10 +94,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         actions: [
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+            tooltip: _isGridView ? 'Switch to list view' : 'Switch to grid view',
             onPressed: () => setState(() => _isGridView = !_isGridView),
           ),
           PopupMenuButton<SortOption>(
             icon: const Icon(Icons.sort),
+            tooltip: 'Sort documents',
             onSelected: (option) => ref.read(dashboardProvider.notifier).setSort(option),
             itemBuilder: (context) => [
               const PopupMenuItem(value: SortOption.recent, child: Text('Recent')),
@@ -164,8 +168,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         if (folders.isNotEmpty && state.selectedFolderId == null) ...[
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text('Folders', style: TextStyle(color: AppColors.lightTextSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+              padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.sm),
+              child: Text('FOLDERS', style: AppTypography.labelLarge.copyWith(color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
             ),
           ),
           SliverToBoxAdapter(
@@ -192,17 +196,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
         ],
-        // Documents header
+        // Documents header — Taste Skill: Label style with breathing space
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text('Documents', style: TextStyle(color: AppColors.lightTextSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+            padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.sm),
+            child: Text('DOCUMENTS', style: AppTypography.labelLarge.copyWith(color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
           ),
         ),
         // Documents grid or list
         if (docs.isEmpty)
-          const SliverFillRemaining(
-            child: Center(child: Text('No documents found')),
+          SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.picture_as_pdf_outlined, size: 48, color: AppColors.lightTextTertiary),
+                  const SizedBox(height: AppSpacing.md),
+                  Text('No documents yet', style: AppTypography.titleMedium.copyWith(color: AppColors.lightTextSecondary)),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text('Upload your first PDF to get started', style: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextTertiary)),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(onPressed: _showUploadDialog, label: 'Upload PDF', variant: AppButtonVariant.secondary),
+                ],
+              ),
+            ),
           )
         else if (_isGridView)
           SliverPadding(
@@ -217,7 +234,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) => DocumentCard(
                   document: docs[index],
-                  onTap: () {},
+                  onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => DocumentViewerScreen(document: docs[index]))); },
                   onLongPress: () => _showDocumentOptions(docs[index]),
                 ),
                 childCount: docs.length,
@@ -231,7 +248,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
                 title: Text(docs[index].title, maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: Text('${docs[index].pageCount} pages · ${docs[index].fileSizeFormatted}'),
-                onTap: () {},
+                onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => DocumentViewerScreen(document: docs[index]))); },
                 onLongPress: () => _showDocumentOptions(docs[index]),
               ),
               childCount: docs.length,

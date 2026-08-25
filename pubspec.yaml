@@ -9,7 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  filesize: ^2.0.1
+  formz: ^0.7.0
   # UI
   cupertino_icons: ^1.0.8
 

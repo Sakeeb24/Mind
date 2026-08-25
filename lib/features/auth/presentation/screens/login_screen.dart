@@ -32,7 +32,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Listen for errors
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.status == AuthStatus.error && next.errorMessage != null) {
         setState(() => _isLoading = false);
@@ -45,28 +44,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 60),
-              // Logo placeholder
-              const Icon(Icons.menu_book_rounded, size: 80, color: AppColors.primary),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Logo
+              Semantics(label: 'MindSpace logo', child: const Icon(Icons.menu_book_rounded, size: 72, color: AppColors.primary)),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Title — Taste Skill: Bold hierarchy
               Text(
                 'Welcome Back',
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: AppTypography.display,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
+
+              // Subtitle — Taste Skill: Calm secondary tone
               Text(
                 'Sign in to continue studying',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.lightTextSecondary,
-                    ),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.lightTextSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+
+              const SizedBox(height: AppSpacing.xxl),
+
+              // Form
               AuthForm(
                 onSubmit: (email, password, _) {
                   _email = email;
@@ -75,34 +82,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 },
                 submitLabel: 'Sign In',
               ),
-              const SizedBox(height: 8),
+
+              // Forgot password — Taste Skill: Intentional color
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => context.push('/forgot-password'),
-                  child: const Text('Forgot password?'),
+                  child: Text(
+                    'Forgot password\u2026',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: AppSpacing.md),
+
+              // Primary CTA
               AppButton(
                 onPressed: _isLoading ? null : _handleEmailSignIn,
                 label: 'Sign In',
                 isLoading: _isLoading,
                 isExpanded: true,
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // Social login
               SocialLoginButtons(
                 onGoogleTap: _handleGoogleSignIn,
                 isLoading: _isLoading,
               ),
-              const SizedBox(height: 32),
+
+              const SizedBox(height: AppSpacing.xl),
+
+              // Sign up link — Taste Skill: Subtle with purpose
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? "),
+                  Text(
+                    "Don't have an account? ",
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () => context.push('/signup'),
-                    child: const Text('Sign Up'),
+                    child: Text(
+                      'Sign Up',
+                      style: AppTypography.titleMedium.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ],
               ),
