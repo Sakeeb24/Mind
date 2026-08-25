@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindSpace — App Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0B0F1A;
+    color: #F9FAFB;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .container {
+    position: relative;
+    width: 390px;
+    height: 844px;
+  }
+
+  .phone {
+    position: absolute;
+    top: 0; left: 0;
+    width: 390px;
+    height: 844px;
+    background: #151A28;
+    border-radius: 28px;
+    border: 1px solid #1F2937;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+
+  .phone.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9CA3AF;
+  }
+
+  .body { padding: 20px; height: calc(100% - 40px); overflow: hidden; }
+
+  /* Auth screens */
+  .auth-logo {
+    width: 64px; height: 64px;
+    background: #6C63FF;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 28px; font-weight: 700;
+    margin: 40px auto 20px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s;
+  }
+  .phone.active .auth-logo { opacity: 1; transform: translateY(0); }
+
+  .auth-title {
+    text-align: center; font-size: 28px; font-weight: 700;
+    color: #F9FAFB; letter-spacing: -0.5px; margin-bottom: 6px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.2s, transform 0.3s ease-out 0.2s;
+  }
+  .phone.active .auth-title { opacity: 1; transform: translateY(0); }
+
+  .auth-sub {
+    text-align: center; font-size: 15px; color: #9CA3AF; margin-bottom: 32px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.25s, transform 0.3s ease-out 0.25s;
+  }
+  .phone.active .auth-sub { opacity: 1; transform: translateY(0); }
+
+  .field {
+    margin-bottom: 16px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.35s, transform 0.3s ease-out 0.35s;
+  }
+  .phone.active .field { opacity: 1; transform: translateY(0); }
+
+  .field label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #9CA3AF; margin-bottom: 6px; letter-spacing: 0.3px;
+  }
+  .field input {
+    width: 100%; padding: 14px 16px; background: #F3F4F6;
+    border: 1px solid transparent; border-radius: 10px;
+    color: #111827; font-size: 14px;
+  }
+
+  .btn {
+    width: 100%; padding: 15px; background: #6C63FF; color: #fff;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-bottom: 16px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.45s, transform 0.3s ease-out 0.45s;
+  }
+  .phone.active .btn { opacity: 1; transform: translateY(0); }
+
+  .or-divider {
+    text-align: center; font-size: 12px; color: #9CA3AF;
+    margin: 16px 0; font-weight: 500; letter-spacing: 0.5px;
+    opacity: 0;
+    transition: opacity 0.3s ease-out 0.5s;
+  }
+  .phone.active .or-divider { opacity: 1; }
+
+  .btn-secondary {
+    width: 100%; padding: 13px; background: #F3F4F6; color: #111827;
+    border: 1px solid #E5E7EB; border-radius: 10px; font-size: 14px;
+    font-weight: 500; cursor: pointer; margin-bottom: 10px;
+    opacity: 0; transform: translateY(15px);
+    transition: opacity 0.3s ease-out 0.55s, transform 0.3s ease-out 0.55s;
+  }
+  .phone.active .btn-secondary { opacity: 1; transform: translateY(0); }
+
+  .link {
+    text-align: center; font-size: 14px; color: #9CA3AF; margin-top: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease-out 0.6s;
+  }
+  .phone.active .link { opacity: 1; }
+  .link a { color: #6C63FF; text-decoration: none; font-weight: 600; }
+
+  /* Dashboard */
+  .appbar {
+    display: flex; align-items: center; padding: 14px 16px;
+    border-bottom: 1px solid #1F2937;
+  }
+  .appbar-title { font-size: 18px; font-weight: 600; color: #F9FAFB; flex: 1; }
+  .appbar-icon { color: #9CA3AF; margin: 0 6px; font-size: 18px; }
+
+  .search {
+    padding: 12px 16px; background: #F3F4F6; border-radius: 10px;
+    color: #6B7280; font-size: 14px; width: 100%; margin-bottom: 16px;
+  }
+
+  .sec {
+    font-size: 11px; font-weight: 600; color: #9CA3AF;
+    text-transform: uppercase; letter-spacing: 0.8px; margin: 16px 0 12px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s ease-out 0.2s, transform 0.3s ease-out 0.2s;
+  }
+  .phone.active .sec { opacity: 1; transform: translateY(0); }
+
+  .folders {
+    display: flex; gap: 10px; margin-bottom: 16px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s ease-out 0.25s, transform 0.3s ease-out 0.25s;
+  }
+  .phone.active .folders { opacity: 1; transform: translateY(0); }
+
+  .folder {
+    flex: 1; padding: 16px; background: #1E2436;
+    border: 1px solid #1F2937; border-radius: 12px;
+  }
+  .folder .icon { font-size: 24px; margin-bottom: 8px; }
+  .folder .name { font-size: 13px; font-weight: 600; color: #F9FAFB; }
+  .folder .count { font-size: 11px; color: #6B7280; margin-top: 2px; }
+
+  .grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s ease-out 0.3s, transform 0.3s ease-out 0.3s;
+  }
+  .phone.active .grid { opacity: 1; transform: translateY(0); }
+
+  .doc {
+    background: #1E2436; border: 1px solid #1F2937;
+    border-radius: 12px; padding: 16px;
+  }
+  .doc-icon { font-size: 28px; text-align: center; padding: 12px 0; color: #EF4444; }
+  .doc .title { font-size: 12px; font-weight: 600; color: #F9FAFB; margin-top: 8px; }
+  .doc .meta { font-size: 11px; color: #6B7280; margin-top: 4px; }
+
+  /* Viewer */
+  .page {
+    background: #fff; border-radius: 8px; padding: 24px;
+    min-height: 200px; color: #111827; font-size: 14px; line-height: 1.7;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s ease-out 0.15s, transform 0.3s ease-out 0.15s;
+  }
+  .phone.active .page { opacity: 1; transform: translateY(0); }
+
+  .highlight { background: #FFEB3B; padding: 2px 6px; border-radius: 3px; }
+
+  .nav {
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease-out 0.25s;
+  }
+  .phone.active .nav { opacity: 1; }
+
+  .nav-btn {
+    padding: 10px 20px; background: #F3F4F6; border: 1px solid #E5E7EB;
+    border-radius: 8px; color: #111827; font-size: 13px;
+  }
+  .nav-ind { font-size: 13px; color: #6B7280; font-weight: 500; }
+
+  .toolbar {
+    display: flex; align-items: center; padding: 12px 0;
+    border-top: 1px solid #1F2937; margin-top: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease-out 0.3s;
+  }
+  .phone.active .toolbar { opacity: 1; }
+
+  .dot { width: 28px; height: 28px; border-radius: 50%; margin-right: 10px; border: 2px solid transparent; }
+  .dot.active { border-color: #6C63FF; }
+  .spacer { flex: 1; }
+  .tbtn { padding: 8px; color: #9CA3AF; font-size: 20px; }
+
+  /* Chat */
+  .chat { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; }
+  .bubble {
+    max-width: 80%; padding: 12px 16px; border-radius: 18px;
+    font-size: 14px; line-height: 1.6;
+    opacity: 0; transform: translateY(10px);
+  }
+  .bubble.show { opacity: 1; transform: translateY(0); transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+  .bu { align-self: flex-end; background: #6C63FF; color: #fff; border-bottom-right-radius: 4px; }
+  .ba { align-self: flex-start; background: #1E2436; color: #E5E7EB; border-bottom-left-radius: 4px; }
+  .cite {
+    margin-top: 8px; font-size: 11px; font-weight: 500;
+    padding: 3px 8px; background: rgba(108, 99, 255, 0.15);
+    border-radius: 8px; color: #8B83FF; display: inline-block; margin-right: 6px;
+  }
+  .chat-in {
+    display: flex; gap: 10px; padding: 16px 0; border-top: 1px solid #1F2937;
+    opacity: 0;
+    transition: opacity 0.3s ease-out 0.8s;
+  }
+  .phone.active .chat-in { opacity: 1; }
+  .chat-in input {
+    flex: 1; padding: 12px 16px; background: #F3F4F6;
+    border: 1px solid transparent; border-radius: 24px;
+    color: #111827; font-size: 14px;
+  }
+  .chat-in button {
+    width: 40px; height: 40px; background: #6C63FF;
+    border: none; border-radius: 50%; color: #fff; font-size: 18px;
+  }
+
+  /* Summary */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+  .tab {
+    flex: 1; padding: 10px; background: #1E2436; border: 1px solid #1F2937;
+    border-radius: 8px; text-align: center; font-size: 13px; color: #9CA3AF;
+    opacity: 0; transform: translateY(10px);
+  }
+  .tab.show { opacity: 1; transform: translateY(0); transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+  .tab.on { background: #6C63FF; color: #fff; border-color: #6C63FF; }
+
+  .scard {
+    background: #1E2436; border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.4s ease-out 0.5s, transform 0.4s ease-out 0.5s;
+  }
+  .phone.active .scard { opacity: 1; transform: translateY(0); }
+  .scard .sl { font-size: 14px; font-weight: 600; color: #F9FAFB; }
+  .scard .sm { font-size: 11px; color: #6B7280; }
+  .scard .sc { font-size: 14px; color: #D1D5DB; line-height: 1.7; margin-top: 10px; }
+
+  .sacts { display: flex; gap: 10px; opacity: 0; transition: opacity 0.3s ease-out 0.7s; }
+  .phone.active .sacts { opacity: 1; }
+  .sacts button {
+    flex: 1; padding: 12px; background: #1E2436; border: 1px solid #1F2937;
+    border-radius: 10px; color: #F9FAFB; font-size: 13px; font-weight: 500;
+  }
+  .rl {
+    text-align: center; font-size: 12px; color: #6B7280;
+    margin-top: 16px; font-weight: 500; opacity: 0;
+    transition: opacity 0.3s ease-out 0.8s;
+  }
+  .phone.active .rl { opacity: 1; }
+
+  /* Controls */
+  .controls {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; z-index: 100;
+  }
+  .ctrl-btn {
+    padding: 10px 20px; background: #1E2436; border: 1px solid #1F2937;
+    border-radius: 8px; color: #F9FAFB; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  .ctrl-btn:hover { background: #2A3040; }
+  .ctrl-btn.active { background: #6C63FF; border-color: #6C63FF; }
+
+  .progress {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .dot-indicator {
+    width: 8px; height: 8px; border-radius: 50%; background: #1F2937;
+    transition: background 0.3s;
+  }
+  .dot-indicator.active { background: #6C63FF; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="container">
+  <!-- LOGIN -->
+  <div class="phone" id="screen-0">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="body">
+      <div class="auth-logo">M</div>
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-sub">Sign in to continue studying</div>
+      <div class="field"><label>EMAIL</label><input placeholder="you@email.com" /></div>
+      <div class="field"><label>PASSWORD</label><input type="password" placeholder="••••••••" /></div>
+      <div style="text-align:right;margin-bottom:16px"><a style="color:#6C63FF;font-size:13px;font-weight:500">Forgot password…</a></div>
+      <button class="btn">Sign In</button>
+      <div class="or-divider">OR</div>
+      <button class="btn-secondary">Continue with Google</button>
+      <div class="link">Don't have an account? <a>Sign Up</a></div>
+    </div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="phone" id="screen-1">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="body">
+      <div class="auth-logo">M</div>
+      <div class="auth-title">Create Account</div>
+      <div class="auth-sub">Start your free study assistant</div>
+      <div class="field"><label>FULL NAME</label><input placeholder="Your name" /></div>
+      <div class="field"><label>EMAIL</label><input placeholder="you@email.com" /></div>
+      <div class="field"><label>PASSWORD</label><input type="password" placeholder="••••••••" /></div>
+      <button class="btn">Create Account</button>
+      <div class="or-divider">OR</div>
+      <button class="btn-secondary">Continue with Google</button>
+      <div class="link">Already have an account? <a>Sign In</a></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="phone" id="screen-2">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="appbar"><span class="appbar-title">MindSpace</span><span class="appbar-icon">⊞</span><span class="appbar-icon">⇅</span></div>
+    <div class="body">
+      <input class="search" placeholder="🔍  Search documents" />
+      <div class="sec">FOLDERS</div>
+      <div class="folders">
+        <div class="folder"><div class="icon">📁</div><div class="name">Biology</div><div class="count">3 docs</div></div>
+        <div class="folder"><div class="icon">📁</div><div class="name">CS101</div><div class="count">5 docs</div></div>
+        <div class="folder"><div class="icon">📁</div><div class="name">Math</div><div class="count">2 docs</div></div>
+      </div>
+      <div class="sec">DOCUMENTS</div>
+      <div class="grid">
+        <div class="doc"><div class="doc-icon">📄</div><div class="title">Neural Networks.pdf</div><div class="meta">12 pages · 2.4 MB</div></div>
+        <div class="doc"><div class="doc-icon">📄</div><div class="title">Data Structures.pdf</div><div class="meta">8 pages · 1.1 MB</div></div>
+        <div class="doc"><div class="doc-icon">📄</div><div class="title">Calculus Notes.pdf</div><div class="meta">15 pages · 3.2 MB</div></div>
+        <div class="doc"><div class="doc-icon">📄</div><div class="title">AI Research.pdf</div><div class="meta">20 pages · 4.8 MB</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEWER -->
+  <div class="phone" id="screen-3">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="appbar"><span class="appbar-icon">←</span><span class="appbar-title" style="font-size:14px;letter-spacing:0">Neural Networks.pdf</span><span class="appbar-icon">☰</span></div>
+    <div class="body" style="background:#F3F4F6;padding:16px">
+      <div class="page">
+        <strong style="color:#6C63FF;font-size:13px;letter-spacing:0.3px">PAGE 1</strong><br><br>
+        Neural networks are computing systems inspired by biological neural networks. They consist of layers of interconnected nodes that process information.<br><br>
+        <span class="highlight">Deep learning</span> uses neural networks with multiple layers to learn hierarchical representations of data.
+      </div>
+      <div class="nav">
+        <button class="nav-btn" disabled>← Prev</button>
+        <span class="nav-ind">1 / 12</span>
+        <button class="nav-btn">Next →</button>
+      </div>
+      <div class="toolbar">
+        <div class="dot active" style="background:#FFEB3B"></div>
+        <div class="dot" style="background:#66BB6A"></div>
+        <div class="dot" style="background:#42A5F5"></div>
+        <div class="dot" style="background:#EC407A"></div>
+        <div class="spacer"></div>
+        <span class="tbtn">↩</span><span class="tbtn">↪</span><span class="tbtn">📝</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="phone" id="screen-4">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="appbar">
+      <span class="appbar-icon">←</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:#F9FAFB">AI Chat</div><div style="font-size:11px;color:#6B7280">Neural Networks.pdf</div></div>
+      <span class="appbar-icon" style="margin-left:auto">🗑</span>
+    </div>
+    <div class="body" style="padding:16px 20px;display:flex;flex-direction:column;min-height:760px">
+      <div class="chat">
+        <div class="bubble bu" id="b1">What are the main types of neural networks?</div>
+        <div class="bubble ba" id="b2">The main types are: <strong>CNNs</strong> for images, <strong>RNNs/LSTMs</strong> for sequences, <strong>Transformers</strong> for attention tasks, and <strong>GANs</strong> for generative models.<div class="cite">Page 3</div><div class="cite">Page 5</div></div>
+        <div class="bubble bu" id="b3">Which is best for NLP?</div>
+        <div class="bubble ba" id="b4">Transformers are the current standard for NLP, powering GPT and BERT. They use self-attention to process sequences in parallel.<div class="cite">Page 7</div></div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="chat-in"><input placeholder="Ask about this document…" /><button>➤</button></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="phone" id="screen-5">
+    <div class="statusbar"><span>9:41</span><span>100%</span></div>
+    <div class="appbar"><span class="appbar-icon">←</span><span class="appbar-title">AI Summary</span></div>
+    <div class="body">
+      <div style="font-size:13px;color:#9CA3AF;margin-bottom:10px;font-weight:500">Summarize:</div>
+      <div class="tabs">
+        <div class="tab on" id="t1">This Page</div>
+        <div class="tab" id="t2">Section</div>
+        <div class="tab" id="t3">Selection</div>
+      </div>
+      <button class="btn" style="margin-bottom:20px">Generate Summary</button>
+      <div class="scard">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="sl">Summary</span>
+          <span class="sm">Nemotron Ultra 550B</span>
+        </div>
+        <div class="sc">Neural networks are computing systems inspired by biological neural networks. Deep learning uses multiple layers to learn hierarchical representations. Key architectures: CNNs for vision, RNNs for sequences, Transformers for attention.</div>
+      </div>
+      <div class="sacts">
+        <button>📋 Copy</button>
+        <button>📤 Share</button>
+      </div>
+      <div class="rl">AI queries remaining today: 19</div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="prevScreen()">← Prev</button>
+  <button class="ctrl-btn" id="autoBtn" onclick="toggleAuto()">▶ Auto Play</button>
+  <button class="ctrl-btn" onclick="nextScreen()">Next →</button>
+</div>
+
+<script>
+const screens = 6;
+let current = 0;
+let autoPlay = false;
+let interval = null;
+
+function showScreen(index) {
+  document.querySelectorAll('.phone').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dot-indicator').forEach(d => d.classList.remove('active'));
+  
+  const screen = document.getElementById(`screen-${index}`);
+  if (screen) {
+    screen.classList.add('active');
+    // Animate chat bubbles
+    if (index === 4) {
+      setTimeout(() => document.getElementById('b1')?.classList.add('show'), 200);
+      setTimeout(() => document.getElementById('b2')?.classList.add('show'), 600);
+      setTimeout(() => document.getElementById('b3')?.classList.add('show'), 1000);
+      setTimeout(() => document.getElementById('b4')?.classList.add('show'), 1400);
+    }
+    // Animate summary tabs
+    if (index === 5) {
+      setTimeout(() => document.getElementById('t1')?.classList.add('show'), 200);
+      setTimeout(() => document.getElementById('t2')?.classList.add('show'), 300);
+      setTimeout(() => document.getElementById('t3')?.classList.add('show'), 400);
+    }
+  }
+  
+  const dots = document.querySelectorAll('.dot-indicator');
+  if (dots[index]) dots[index].classList.add('active');
+}
+
+function nextScreen() {
+  current = (current + 1) % screens;
+  showScreen(current);
+}
+
+function prevScreen() {
+  current = (current - 1 + screens) % screens;
+  showScreen(current);
+}
+
+function toggleAuto() {
+  autoPlay = !autoPlay;
+  const btn = document.getElementById('autoBtn');
+  if (autoPlay) {
+    btn.textContent = '⏸ Pause';
+    btn.classList.add('active');
+    interval = setInterval(nextScreen, 3000);
+  } else {
+    btn.textContent = '▶ Auto Play';
+    btn.classList.remove('active');
+    clearInterval(interval);
+  }
+}
+
+// Create progress dots
+const progress = document.getElementById('progress');
+for (let i = 0; i < screens; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot-indicator';
+  dot.onclick = () => { current = i; showScreen(current); };
+  progress.appendChild(dot);
+}
+
+// Start
+showScreen(0);
+</script>
+</body>
+</html>
