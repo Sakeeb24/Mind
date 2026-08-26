@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mindspace/config/theme.dart';
+import 'package:mindspace/services/ai/ai_usage_tracker.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
 import 'package:mindspace/features/summarization/presentation/providers/summary_provider.dart';
@@ -86,7 +87,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Error container
+            // Error container with retry
             if (summaryState.error != null)
               Container(
                 padding: const EdgeInsets.all(12),
@@ -95,9 +96,26 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.error.withAlpha(50)),
                 ),
-                child: Text(
-                  summaryState.error!,
-                  style: GoogleFonts.plusJakartaSans(color: AppColors.error, fontSize: 13),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: AppColors.error, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        summaryState.error!,
+                        style: GoogleFonts.plusJakartaSans(color: AppColors.error, fontSize: 13),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => ref.read(summaryProvider.notifier).summarize(
+                            documentId: widget.document.id,
+                            documentText: 'Document text for ${widget.document.title}',
+                            scope: _selectedScope,
+                          ),
+                      icon: const Icon(Icons.refresh, size: 14),
+                      label: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
 
@@ -213,7 +231,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
               padding: const EdgeInsets.symmetric(vertical: 6),
               alignment: Alignment.center,
               child: Text(
-                'AI queries remaining today: ${summaryState.remainingQueries}',
+                'AI queries remaining today: ${AiUsageTracker.getRemaining()}',
                 style: GoogleFonts.jetBrainsMono(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,

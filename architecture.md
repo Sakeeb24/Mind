@@ -1,7 +1,7 @@
 # MindSpace — Architecture & High-Level Design
 
-> **Version**: 1.0 — August 2026
-> **Last Updated**: August 24, 2026
+> **Version**: 2.0 — August 2026
+> **Last Updated**: August 26, 2026
 
 ---
 
@@ -46,14 +46,14 @@
                     │          CLOUD SERVICES                        │
                     │                                                │
                     │  ┌──────────────┐  ┌───────────────────────┐  │
-                    │  │  Supabase    │  │  NVIDIA Nemotron API  │  │
+                    │  │  Puter    │  │  Puter AI API  │  │
                     │  │  ┌────────┐  │  │  ┌─────────────────┐  │  │
-                    │  │  │Auth    │  │  │  │ Nemotron-Parse  │  │  │
+                    │  │  │Auth    │  │  │  │ puter ai-Parse  │  │  │
                     │  │  ├────────┤  │  │  ├─────────────────┤  │  │
-                    │  │  │Database│  │  │  │ Nemotron 3 Ultra│  │  │
+                    │  │  │Database│  │  │  │ puter ai 3 Ultra│  │  │
                     │  │  ├────────┤  │  │  │ (550B)          │  │  │
                     │  │  │Storage │  │  │  ├─────────────────┤  │  │
-                    │  │  ├────────┤  │  │  │ Nemotron 3 Nano │  │  │
+                    │  │  ├────────┤  │  │  │ puter ai 3 Nano │  │  │
                     │  │  │Edge    │  │  │  │ (30B)           │  │  │
                     │  │  │Functions│ │  │  └─────────────────┘  │  │
                     │  │  └────────┘  │  └───────────────────────┘  │
@@ -63,7 +63,7 @@
 
 ### 1.2 Architecture Philosophy
 
-MindSpace follows an **offline-first, client-heavy** architecture. The Flutter app is the brain — it handles most logic locally using Hive for storage and Riverpod for state. Cloud services (Supabase, NVIDIA) are used sparingly for authentication, cloud backup, and AI processing.
+MindSpace follows an **offline-first, client-heavy** architecture. The Flutter app is the brain — it handles most logic locally using Hive for storage and Riverpod for state. Cloud services (Puter, NVIDIA) are used sparingly for authentication, cloud backup, and AI processing.
 
 **Key Design Decisions**
 
@@ -72,8 +72,8 @@ MindSpace follows an **offline-first, client-heavy** architecture. The Flutter a
 | Client-heavy architecture | Offline-first requirement; students study in areas with poor connectivity |
 | Hive over SQLite | No native code needed; simpler API; sufficient for key-value and structured data |
 | Riverpod over BLoC | More concise; better testability; built-in code generation |
-| Supabase over Firebase | Open-source; PostgreSQL gives more control; generous free tier |
-| NVIDIA Nemotron over OpenAI/Gemini | Free tier; no data retention; better document accuracy; bounding box extraction |
+| Puter over Firebase | Open-source; KV Store gives more control; generous free tier |
+| Puter AI over OpenAI/Gemini | Free tier; no data retention; better document accuracy; bounding box extraction |
 | pdfx over syncfusion_pdfviewer | Fully free; open-source; sufficient for MVP |
 
 ---
@@ -85,7 +85,7 @@ MindSpace follows an **offline-first, client-heavy** architecture. The Flutter a
 **Authentication Module**
 - Handles sign-up, sign-in, sign-out, password reset
 - Manages session tokens via flutter_secure_storage
-- Google OAuth flow via Supabase Auth
+- Puter token-based auth flow via Puter Auth
 - Token refresh logic (auto-refresh before expiry)
 - Auth state exposed via Riverpod auth provider
 
@@ -98,9 +98,9 @@ MindSpace follows an **offline-first, client-heavy** architecture. The Flutter a
 - Document search and filtering
 
 **AI Module**
-- Text extraction pipeline (Nemotron-Parse)
-- Summarization engine (Nemotron 3 Ultra 550B)
-- Q&A chat engine (Nemotron 3 Ultra 550B)
+- Text extraction pipeline (puter ai-Parse)
+- Summarization engine (puter ai 3 Ultra 550B)
+- Q&A chat engine (puter ai 3 Ultra 550B)
 - Response caching (avoid re-querying for same question)
 - Rate limit management (40 RPM per endpoint)
 - Request queue for concurrent requests
@@ -109,7 +109,7 @@ MindSpace follows an **offline-first, client-heavy** architecture. The Flutter a
 - Highlight creation, editing, deletion
 - Sticky note creation, editing, deletion
 - Undo/redo stack (50-action depth)
-- Annotation persistence (Hive + Supabase sync)
+- Annotation persistence (Hive + Puter sync)
 - Annotation rendering overlay on PDF viewer
 
 **State Management Layer (Riverpod)**
@@ -123,47 +123,47 @@ MindSpace follows an **offline-first, client-heavy** architecture. The Flutter a
 
 ### 2.2 Cloud Services
 
-**Supabase**
+**Puter**
 | Service | Usage | Free Tier Limit |
 |---|---|---|
-| Auth | Email + Google OAuth | 50,000 MAU |
+| Auth | Email + Puter token-based auth | 50,000 MAU |
 | Database | Document metadata, annotations, chat history | 500MB |
 | Storage | Document file backup (optional sync) | 1GB |
-| Edge Functions | Server-side AI request proxying (hide API keys) | 500K invocations |
+| REST API | Server-side AI request proxying (hide API keys) | 500K invocations |
 | Real-time | Future: collaboration features (V2) | 200 concurrent |
 
-**NVIDIA Nemotron**
+**Puter AI**
 | Model | Usage | Free Tier |
 |---|---|---|
-| Nemotron-Parse | PDF text extraction with bounding boxes | 40 RPM |
-| Nemotron 3 Ultra 550B | Summarization + Q&A | 40 RPM |
-| Nemotron 3 Nano 30B | Fast responses for simple queries | 40 RPM |
+| puter ai-Parse | PDF text extraction with bounding boxes | 40 RPM |
+| puter ai 3 Ultra 550B | Summarization + Q&A | 40 RPM |
+| puter ai 3 Nano 30B | Fast responses for simple queries | 40 RPM |
 
 ### 2.3 Service Interfaces
 
 All external services are accessed through **abstract service interfaces** in the codebase. This ensures:
 
 1. **Testability** — mock any service in unit tests
-2. **Swappability** — replace Supabase with Firebase without touching business logic
+2. **Swappability** — replace Puter with Firebase without touching business logic
 3. **Consistency** — uniform error handling across all service calls
 
 ```
 AuthService (interface)
-  ├── SupabaseAuthService (implementation)
+  ├── PuterAuthService (implementation)
   └── MockAuthService (testing)
 
 DocumentService (interface)
   ├── LocalDocumentService (Hive implementation)
-  └── CloudDocumentService (Supabase implementation)
+  └── CloudDocumentService (Puter implementation)
 
 AIService (interface)
-  ├── NemotronParseService (text extraction)
-  ├── NemotronUltraService (summarization + Q&A)
+  ├── puter aiParseService (text extraction)
+  ├── puter aiUltraService (summarization + Q&A)
   └── MockAIService (testing)
 
 AnnotationService (interface)
   ├── LocalAnnotationService (Hive)
-  └── CloudAnnotationService (Supabase sync)
+  └── CloudAnnotationService (Puter sync)
 ```
 
 ---
@@ -197,13 +197,13 @@ AnnotationService (interface)
 
 | Service | Purpose | Free Tier Limit |
 |---|---|---|
-| Supabase Auth | User authentication (email + Google) | 50,000 MAU |
-| Supabase PostgreSQL | Cloud database for metadata | 500MB |
-| Supabase Storage | Cloud file storage (optional sync) | 1GB |
-| Supabase Edge Functions | API proxy to hide NVIDIA keys | 500K invocations/month |
-| NVIDIA Nemotron-Parse | PDF text extraction | 40 RPM |
-| NVIDIA Nemotron 3 Ultra 550B | Summarization + Q&A | 40 RPM |
-| NVIDIA Nemotron 3 Nano 30B | Fast alternative model | 40 RPM |
+| Puter Auth | User authentication (email + Google) | 50,000 MAU |
+| Puter KV Store | Cloud database for metadata | 500MB |
+| Puter Storage | Cloud file storage (optional sync) | 1GB |
+| Puter REST API | API proxy to hide NVIDIA keys | 500K invocations/month |
+| Puter AI-Parse | PDF text extraction | 40 RPM |
+| Puter AI 3 Ultra 550B | Summarization + Q&A | 40 RPM |
+| Puter AI 3 Nano 30B | Fast alternative model | 40 RPM |
 | Vercel | Admin panel hosting (future) | 100GB bandwidth |
 
 ### 3.3 Development Tools
@@ -388,13 +388,13 @@ mindspace/
 │   ├── services/                     # External service integrations
 │   │   ├── auth/
 │   │   │   ├── auth_service.dart         # Abstract interface
-│   │   │   ├── supabase_auth_service.dart
+│   │   │   ├── puter_auth_service.dart
 │   │   │   └── mock_auth_service.dart
 │   │   ├── ai/
 │   │   │   ├── ai_service.dart           # Abstract interface
-│   │   │   ├── nemotron_parse_service.dart
-│   │   │   ├── nemotron_ultra_service.dart
-│   │   │   ├── nemotron_nano_service.dart
+│   │   │   ├── puter ai_parse_service.dart
+│   │   │   ├── puter ai_ultra_service.dart
+│   │   │   ├── puter ai_nano_service.dart
 │   │   │   └── mock_ai_service.dart
 │   │   ├── storage/
 │   │   │   ├── cloud_storage_service.dart
@@ -470,10 +470,10 @@ The project follows **Clean Architecture** with three layers per feature:
 | Widget file | `*_widget.dart` or descriptive | `chat_bubble.dart` |
 | Provider file | `*_provider.dart` | `auth_provider.dart` |
 | Repository interface | `*_repository.dart` | `document_repository.dart` |
-| Repository implementation | `*_repository_impl.dart` or `supabase_*` | `supabase_document_repository.dart` |
+| Repository implementation | `*_repository_impl.dart` or `puter_*` | `puter_document_repository.dart` |
 | Model/Entity | `*_model.dart` / `*_entity.dart` | `document_model.dart` |
 | Service interface | `*_service.dart` | `ai_service.dart` |
-| Service implementation | `*_service_impl.dart` | `nemotron_ultra_service.dart` |
+| Service implementation | `*_service_impl.dart` | `puter ai_ultra_service.dart` |
 
 ---
 
@@ -492,9 +492,9 @@ User taps "Sign In with Google"
          │
          ▼
 ┌─────────────────────┐
-│ Supabase Auth        │
+│ Puter Auth        │
 │ signInWithOAuth()    │
-│ Opens Google Sign-In │
+│ Opens Puter token sign-in │
 │ system dialog        │
 └────────┬────────────┘
          │
@@ -571,10 +571,10 @@ User taps FAB "+" → Selects "Upload PDF"
          │
          ▼
 ┌─────────────────────┐
-│ Upload to Supabase   │
+│ Upload to Puter   │
 │ Storage (background) │
 │ + Save metadata to   │
-│ Supabase Database    │
+│ Puter Database    │
 └────────┬────────────┘
          │
     ┌────┴──────────┐
@@ -585,7 +585,7 @@ User taps FAB "+" → Selects "Upload PDF"
 ┌─────────────────────┐
 │ Trigger background   │
 │ text extraction      │
-│ (Nemotron-Parse)     │
+│ (puter ai-Parse)     │
 │ Page → Image → API   │
 └────────┬────────────┘
          │
@@ -652,7 +652,7 @@ User taps "Summarize" / Sends chat message
          │
          ▼
 ┌─────────────────────┐
-│ Send to Supabase     │
+│ Send to Puter     │
 │ Edge Function        │
 │ (hides NVIDIA API    │
 │  key from client)    │
@@ -661,7 +661,7 @@ User taps "Summarize" / Sends chat message
          ▼
 ┌─────────────────────┐
 │ Edge Function calls  │
-│ NVIDIA Nemotron API  │
+│ Puter AI API  │
 │ (Ultra 550B or       │
 │  Nano 30B based on   │
 │  complexity)         │
@@ -690,7 +690,7 @@ User taps "Summarize" / Sends chat message
          │
          ▼
 ┌─────────────────────┐
-│ Store in Supabase    │
+│ Store in Puter    │
 │ (chat history /      │
 │  summary log)        │
 └────────┬────────────┘
@@ -736,7 +736,7 @@ User selects text on PDF page
          │                        ▼
          │               ┌─────────────────────┐
          │               │ Queue cloud sync     │
-         │               │ (Supabase)           │
+         │               │ (Puter)           │
          │               └─────────────────────┘
          │
     ┌────┴──────────────┐
@@ -815,10 +815,10 @@ User selects text on PDF page
 
 ## 6. Database Schema
 
-### 6.1 Supabase PostgreSQL (Cloud)
+### 6.1 Puter KV Store (Cloud)
 
 ```sql
--- Users table (auto-managed by Supabase Auth, extended here)
+-- Users table (auto-managed by Puter Auth, extended here)
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id),
   display_name TEXT,
@@ -840,7 +840,7 @@ CREATE TABLE folders (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Documents (metadata only — files stored locally or in Supabase Storage)
+-- Documents (metadata only — files stored locally or in Puter Storage)
 CREATE TABLE documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profiles(id) ON DELETE CASCADE,
@@ -927,23 +927,23 @@ CREATE TABLE chat_messages (
 
 ## 7. API Design
 
-### 7.1 Supabase Edge Functions (API Proxy)
+### 7.1 Puter REST API (API Proxy)
 
 Edge functions serve as a **secure proxy** between the client and NVIDIA API, hiding the API key from the mobile app.
 
 **POST /functions/v1/summarize**
 - Input: `documentId`, `scope` ("page"|"section"|"selection"), `pageNumber`, `selectedText?`
-- Process: Load extracted text → Send to Nemotron Ultra 550B → Return summary
+- Process: Load extracted text → Send to puter ai Ultra 550B → Return summary
 - Rate limit: Enforced per user per day
 
 **POST /functions/v1/chat**
 - Input: `documentId`, `message`, `chatHistory?`
-- Process: Load document context + chat history → Send to Nemotron Ultra 550B → Return response with citations
+- Process: Load document context + chat history → Send to puter ai Ultra 550B → Return response with citations
 - Rate limit: Enforced per user per day
 
 **POST /functions/v1/extract-text**
 - Input: `documentId`, `pageImages` (base64 encoded)
-- Process: Send to Nemotron-Parse → Return structured text with bounding boxes
+- Process: Send to puter ai-Parse → Return structured text with bounding boxes
 - Rate limit: Per document (one-time extraction)
 
 **GET /functions/v1/rate-limit**
@@ -958,7 +958,7 @@ All client-server communication follows this pattern:
 1. Client calls a **Repository method** (domain layer)
 2. Repository delegates to **Service implementation** (data layer)
 3. Service builds request and sends via **Dio HTTP client**
-4. Dio interceptor attaches **Supabase auth token** to every request
+4. Dio interceptor attaches **Puter auth token** to every request
 5. Dio interceptor handles **retry on network failure** (3 attempts, exponential backoff)
 6. Response is **deserialized** into a domain entity
 7. Entity is **cached locally** in Hive
@@ -972,19 +972,19 @@ All client-server communication follows this pattern:
 
 | Data Type | Storage | Encryption |
 |---|---|---|
-| User passwords | Supabase Auth (bcrypt hashed) | Platform-managed |
+| User passwords | Puter Auth (bcrypt hashed) | Platform-managed |
 | Auth tokens | flutter_secure_storage | iOS Keychain / Android Keystore |
 | Document files | App documents directory (local) | Platform sandbox (app isolation) |
-| Annotations | Hive (local) + Supabase (cloud) | Supabase at-rest encryption |
-| AI API keys | Supabase Edge Functions only | Never on client device |
-| Chat history | Hive (local) + Supabase (cloud) | Supabase at-rest encryption |
+| Annotations | Hive (local) + Puter (cloud) | Puter at-rest encryption |
+| AI API keys | Puter REST API only | Never on client device |
+| Chat history | Hive (local) + Puter (cloud) | Puter at-rest encryption |
 
 ### 8.2 Security Rules
 
-1. **API keys never leave the server.** NVIDIA API keys are stored in Supabase Edge Function secrets only. The mobile app never has direct access.
+1. **API keys never leave the server.** NVIDIA API keys are stored in Puter Edge Function secrets only. The mobile app never has direct access.
 2. **All API calls use HTTPS.** No plaintext communication.
 3. **Authentication tokens are refreshed automatically.** Tokens expire after 1 hour; refresh tokens last 30 days.
-4. **Row-level security (RLS) on all Supabase tables.** Users can only read/write their own data.
+4. **Row-level security (RLS) on all Puter tables.** Users can only read/write their own data.
 5. **Input sanitization** on all user-generated content (notes, chat messages) to prevent injection attacks.
 6. **No sensitive data in logs.** Logger redacts auth tokens, user IDs in production builds.
 7. **Document files are app-sandboxed.** Other apps cannot access MindSpace document storage.
@@ -992,7 +992,7 @@ All client-server communication follows this pattern:
 ### 8.3 Privacy Guarantees
 
 - User documents are **never sent to NVIDIA** as raw files. Only extracted text (not images) is sent for AI processing.
-- NVIDIA Nemotron free tier has **no data retention policy** — queries are not stored for training.
-- Supabase stores **metadata only** (titles, page counts, annotations). Actual document files can remain device-only.
+- Puter AI free tier has **no data retention policy** — queries are not stored for training.
+- Puter stores **metadata only** (titles, page counts, annotations). Actual document files can remain device-only.
 - Users can **delete all their data** at any time from Settings → Account → Delete All Data.
-- No analytics or tracking SDKs in the app. Only basic error logging via Supabase.
+- No analytics or tracking SDKs in the app. Only basic error logging via Puter.

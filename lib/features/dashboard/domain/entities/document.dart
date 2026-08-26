@@ -52,6 +52,41 @@ class Document {
 
   String get fileSizeFormatted => filesize(fileSizeBytes);
 
+  /// Serialize to a JSON-compatible map for cloud persistence.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'fileName': fileName,
+        'filePath': filePath,
+        'fileSizeBytes': fileSizeBytes,
+        'pageCount': pageCount,
+        'thumbnailPath': thumbnailPath,
+        'folderId': folderId,
+        'hasExtractedText': hasExtractedText,
+        'createdAt': createdAt.toIso8601String(),
+        'lastOpenedAt': lastOpenedAt?.toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      };
+
+  /// Deserialize from a JSON map.
+  factory Document.fromJson(Map<String, dynamic> json) {
+    return Document(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      fileName: json['fileName']?.toString() ?? '',
+      filePath: json['filePath']?.toString() ?? '',
+      fileSizeBytes: (json['fileSizeBytes'] as num?)?.toInt() ?? 0,
+      pageCount: (json['pageCount'] as num?)?.toInt() ?? 0,
+      thumbnailPath: json['thumbnailPath']?.toString(),
+      folderId: json['folderId']?.toString(),
+      hasExtractedText: json['hasExtractedText'] == true,
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      lastOpenedAt: json['lastOpenedAt'] != null
+          ? DateTime.tryParse(json['lastOpenedAt'].toString())
+          : null,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

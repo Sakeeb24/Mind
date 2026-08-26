@@ -397,7 +397,7 @@ All user preferences are accessible from **Settings → Preferences**:
 - Password field: Label "Password", toggle visibility
 - "Sign In" button: Primary, full width
 - Divider: "OR" centered with horizontal lines
-- Google button: Outlined, Google icon + "Continue with Google"
+- Puter button: Outlined, cloud icon + "Sign in with Puter"
 - Footer: "Don't have an account? Sign Up" (Text Button, centered)
 - Forgot password: "Forgot password?" link below password field
 
@@ -410,7 +410,7 @@ All user preferences are accessible from **Settings → Preferences**:
 - Password field: Label "Password" + requirements hint
 - Confirm Password field: Label "Confirm Password"
 - "Create Account" button: Primary, full width
-- Divider + Google button (same as login)
+- Divider + Puter token input (same as login)
 - Footer: "Already have an account? Sign In"
 
 ### 7.3 Dashboard

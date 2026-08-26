@@ -8,69 +8,57 @@
 
 ## Features
 
-### Phase 1 — Authentication
-- Email/password sign-up and sign-in
-- Google OAuth integration
-- Forgot password flow
-- Auth persistence across app restarts
+### Authentication
+- Puter account token-based authentication
+- Auth persistence across app restarts (secure token storage)
 
-### Phase 2 — Dashboard
+### Dashboard
 - Document grid with search and sort
 - Folder organization with CRUD operations
-- PDF file picker integration
+- PDF file picker integration with 50MB / 200-page validation
 - Grid/list view toggle
 
-### Phase 3 — Document Viewer & Annotations
+### Document Viewer & Annotations
 - PDF rendering with pdfx
 - 4-color highlight system (yellow, green, blue, pink)
-- Sticky note creation and editing
-- Full undo/redo stack for all annotations
+- Sticky note creation and editing (500-char limit)
+- Full undo/redo stack for all annotations (50-action depth)
+- Spatial canvas workspace with ink-link connections
 
-### Phase 4 — AI Features
-- **Summarization**: Page/section/selection scope with Nemotron Ultra 550B
+### AI Features (Powered by Puter)
+- **Summarization**: Page/section/selection scope with 500+ AI models
 - **AI Chat**: Ask questions about your documents with citation badges
-- Rate limiting (20 queries/day on free tier)
-- Offline mock service for development
+- **Flashcards**: AI-generated active-recall study cards
+- **Quiz**: Interactive multiple-choice quizzes with scoring
+- **Formula Extraction**: Key formulas, definitions, and theorems
+- Daily AI usage limit (20 queries/day)
+- Proper error handling with typed errors and retry UI
 
-### Phase 5 — Testing & Quality
+### Testing & Quality
 - 81 passing tests across 17 test files
 - Widget tests for all screens
 - Unit tests for entities, providers, and AI service
-- Web Design Guidelines compliance audit
-
-## Screenshots
-
-Open `screenshots/mindspace-ui-preview.html` in your browser to see all 6 screens:
-
-| Screen | Description |
-|--------|-------------|
-| **Login** | Email/password + Google OAuth with staggered animations |
-| **Sign Up** | Account creation with validation |
-| **Dashboard** | Document grid with folders and search |
-| **Document Viewer** | PDF viewer with annotation toolbar |
-| **AI Chat** | Chat interface with citation badges |
-| **AI Summary** | Scope selector with generate/copy/share |
+- Zero lint warnings
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| **Framework** | Flutter 3.24 |
+| **Framework** | Flutter 3.44.7 |
 | **State** | Riverpod 2.x |
 | **Routing** | GoRouter with custom transitions |
-| **Local Storage** | Hive CE |
-| **Cloud** | Supabase (Auth + Database) |
-| **AI** | NVIDIA Nemotron Ultra 550B |
+| **Local Storage** | Hive CE (offline-first) |
+| **Cloud AI** | Puter (OpenAI-compatible endpoint, 500+ models) |
+| **Auth** | Puter token-based authentication |
 | **PDF** | pdfx |
-| **Design** | Taste Skill + Ponytail |
+| **Design** | Google Stitch design system |
 
 ## Getting Started
 
 ### Prerequisites
 - Flutter 3.24+
 - Dart 3.5+
-- Supabase account (free tier)
-- NVIDIA API key (free tier)
+- A [Puter](https://puter.com) account (free)
 
 ### Setup
 
@@ -82,37 +70,39 @@ cd Mind
 # Install dependencies
 flutter pub get
 
-# Configure environment
-# Edit lib/config/env.dart with your Supabase keys
-
-# Run the app
-flutter run
+# Run the app with your Puter auth token
+flutter run --dart-define=PUTER_AUTH_TOKEN=your_token_here
 ```
 
 ### Environment Variables
 
-```dart
-// lib/config/env.dart
-class Env {
-  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  static const String supabasePublishableKey = 'YOUR_SUPABASE_ANON_KEY';
-}
+All configuration is via `--dart-define` flags. Copy `lib/config/env.dart.example` to `lib/config/env.dart` or pass values at build time:
+
+```bash
+# Required: Puter auth token (get from https://puter.com/dashboard → Create token)
+--dart-define=PUTER_AUTH_TOKEN=your_token_here
+
+# Optional: AI model selection (default: gpt-4o-mini)
+--dart-define=AI_MODEL=gpt-4o-mini
 ```
+
+**Important**: Puter provides free access to 500+ AI models (GPT, Claude, Gemini, Grok, etc.) with no API key management. Your Puter auth token is the only credential needed.
 
 ## Project Structure
 
 ```
 lib/
 ├── config/          # Theme, routes, environment
-├── core/            # Widgets, utils, services
+├── core/            # Widgets, utils, services, errors
 ├── features/
-│   ├── auth/        # Authentication (domain/data/presentation)
+│   ├── auth/        # Puter authentication
 │   ├── dashboard/   # Document management
 │   ├── document_viewer/  # PDF viewer + annotations
 │   ├── ai_chat/     # AI chat interface
 │   ├── summarization/    # AI summarization
 │   └── folders/     # Folder organization
-└── services/        # AI service interfaces
+├── providers/       # AI service provider
+└── services/        # AI service (Puter OpenAI-compatible)
 ```
 
 ## Testing
@@ -138,12 +128,12 @@ GitHub Actions workflow runs on every push/PR:
 
 ## Design System
 
-Built with **Taste Skill** principles:
+Built with **Google Stitch** design system:
 - Typography hierarchy (display → label)
 - Consistent spacing (8/16/24/32/48px)
 - Neutral surfaces with intentional accent color
 - Subtle animations (fade-in, scale, pulse)
-- Cupertino page transitions
+- Custom page transitions
 
 ## License
 
@@ -151,7 +141,6 @@ MIT License
 
 ## Acknowledgments
 
-- [Taste Skill](https://github.com/leonxlnx/taste-skill) — Design guidelines
-- [Ponytail](https://github.com/vercel-labs/agent-skills) — Code quality
-- [Supabase](https://supabase.com) — Backend services
+- [Puter](https://puter.com) — Free AI and cloud infrastructure
+- [Supabase](https://supabase.com) — Previously used for backend (migrated to Puter)
 - [NVIDIA](https://build.nvidia.com) — AI models

@@ -1,7 +1,7 @@
 # MindSpace — Project Memory
 
-> **Version**: 1.2 — August 2026
-> **Last Updated**: August 24, 2026
+> **Version**: 3.0 — August 2026
+> **Last Updated**: August 26, 2026
 
 ---
 
@@ -13,31 +13,15 @@ This file maintains context across development sessions. It records important de
 
 ## Project Status
 
-| Item | Status | Date |
-|---|---|---|
-| PRD | ✅ Complete | Aug 24, 2026 |
-| Architecture | ✅ Complete | Aug 24, 2026 |
-| Rules & Standards | ✅ Complete | Aug 24, 2026 |
-| Phases | ✅ Complete | Aug 24, 2026 |
-| Design Guidelines | ✅ Complete | Aug 24, 2026 |
-| Project Timeline | ✅ Complete | Aug 24, 2026 |
-| README | ✅ Complete | Aug 24, 2026 |
-| Project Memory | ✅ Complete | Aug 24, 2026 |
-| .gitignore | ✅ Complete | Aug 24, 2026 |
-| CONTRIBUTING.md | ✅ Complete | Aug 24, 2026 |
-| GitHub Actions CI/CD | ✅ Complete | Aug 24, 2026 |
-| Supabase Edge Functions | ✅ Complete | Aug 24, 2026 |
-| Localization (ARB) | ✅ Complete | Aug 24, 2026 |
-| GitHub Templates | ✅ Complete | Aug 24, 2026 |
-| Flutter Project Setup | ⏳ Waiting for Flutter install | — |
-| Phase 1: Authentication | ⏳ Not Started | — |
-| Phase 2: Dashboard | ⏳ Not Started | — |
-| Phase 3: Viewer + Annotations | ⏳ Not Started | — |
-| Phase 4: AI Features | ⏳ Not Started | — |
-| Phase 5: Testing & QA | ⏳ Not Started | — |
-| Phase 6: Deployment | ⏳ Not Started | — |
-
----
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Flutter Setup | ✅ Complete | Flutter 3.44.7 installed and working |
+| Phase 1 - Auth | ✅ Complete | Puter token-based auth, no Google OAuth |
+| Phase 2 - Dashboard | ✅ Complete | Document grid, folders, search, sort |
+| Phase 3 - PDF Viewer | ✅ Complete | pdfx rendering, annotations, undo/redo |
+| Phase 4 - AI Features | ✅ Complete | Puter AI (OpenAI-compatible), chat, summarize, flashcards, quiz, formulas |
+| Phase 5 - Testing | ✅ Complete | 111/111 tests passing, 0 analyzer issues |
+| Phase 6 - Deployment | ⏳ Not Started | Pending after testing verification |
 
 ## Key Decisions
 
@@ -75,46 +59,58 @@ This file maintains context across development sessions. It records important de
 
 ## Completed Tasks
 
-### August 24, 2026 — Planning Documents
-- [x] Created PRD.md with full product requirements
-- [x] Created architecture.md with system design, tech stack, folder structure, data flows
-- [x] Created rules.md with approved tech, prohibited items, coding standards
-- [x] Created phases.md with 6 phases across 8 weeks
-- [x] Created design.md with color system, typography, components, screen specs
-- [x] Created memory.md (this file)
-- [x] Created README.md with setup instructions
-- [x] Created project_timeline.md with week-by-week breakdown
+### Phase 1 — Authentication (Puter)
+- Puter token-based auth via REST API (flutter_secure_storage persistence)
+- Auth repository abstraction with PuterAuthRepository implementation
+- Auth provider (Riverpod) with loading/error states
+- Login, signup, forgot-password screens
+- Route guards and auth state persistence
+- **Google OAuth completely removed** — zero references in codebase
 
-### August 24, 2026 — Repository Setup
-- [x] Initialized git repository
-- [x] Added remote origin (https://github.com/Sakeeb24/Mindspace.git)
-- [x] Pushed initial planning documents to main branch
-- [x] Created .gitignore for Flutter project
-- [x] Created CONTRIBUTING.md with contribution guidelines
-- [x] Created feature branch (autopilot/mindspace-fixes)
-- [x] PR #1 merged to main (3 files, +501 lines)
-- [x] Main branch updated with all planning documents
+### Phase 2 — Dashboard & Document Management
+- Document upload with file picker (50MB limit, 200-page limit enforced)
+- Corrupt/unreadable PDF rejection with user-visible errors
+- PDF title extraction (only removes final .pdf extension)
+- Hive-based local storage with 8 boxes
+- Grid/list toggle, search, sort (recent/name/date/size)
+- Folder CRUD with document assignment
+- Empty state illustrations
 
-### August 24, 2026 — Infrastructure & Backend
-- [x] Created GitHub Actions CI/CD workflow (lint, test, build)
-- [x] Created Supabase Edge Functions (summarize, chat, extract-text, rate-limit)
-- [x] Created English localization ARB file (200+ strings)
-- [x] Created env.dart.example with app configuration template
-- [x] Created GitHub issue templates (bug report, feature request)
-- [x] Created PR template with checklist
-- [x] Pushed to feature/phase1-flutter-setup branch
+### Phase 3 — PDF Viewer & Annotations
+- PDF rendering via pdfx with page navigation
+- 4-color highlight system (yellow/green/blue/pink)
+- Sticky notes with long-press creation
+- Undo/redo stack with 50-action limit enforced
+- Annotation persistence in Hive
+- Split-pane workspace layout
 
----
+### Phase 4 — AI Features (Puter AI)
+- AI chat with OpenAI-compatible endpoint (500+ models)
+- Summarization (page/section/selection scope)
+- Flashcard generation (5-card active-recall)
+- Quiz generation (multiple-choice with scoring)
+- Formula & definition extraction
+- AI explanations for excerpts
+- **Shared daily usage limit** via AiUsageTracker (Hive-persisted)
+- **Typed errors** — AiException, RateLimitException (no fake/hardcoded content)
+- **Retry UI** on all AI failure states
 
-## Currently Working On
+### Phase 5 — Cloud Infrastructure (Puter)
+- PuterCloudStorage: PDF file persistence via Puter FS REST API
+- PuterKVService: metadata persistence (docs, folders, highlights, notes, chat, summaries, canvas, settings)
+- CloudSyncService: bidirectional sync (pull cloud → merge → push local)
+- Conflict resolution via updatedAt timestamps
+- Cloud providers (Riverpod): cloudStorageProvider, kvServiceProvider, cloudSyncServiceProvider
+- Auto-sync on login
 
-**Current Phase**: Pre-development (infrastructure complete)
-**Current Branch**: feature/phase1-flutter-setup (awaiting Flutter install)
-**Next Step**: Install Flutter → Initialize project → Set up folder structure
-**Blockers**: Flutter SDK not yet installed on development machine
-**Notes**: All planning docs and infrastructure ready. PR pending for Edge Functions, CI/CD, localization. Waiting for Flutter install to proceed with Phase 1.
-
----
+### Cleanup & Documentation
+- Removed supabase_flutter, supabase/ Edge Functions, all Supabase config
+- Removed Google OAuth (signInWithGoogle, social_login_buttons.dart)
+- Removed NemotronAIService → replaced with PuterAIService
+- Removed 10 unused pubspec dependencies
+- Updated architecture.md, CONTRIBUTING.md, design.md for Puter architecture
+- Updated README.md with Puter setup instructions
+- 111/111 tests passing, 0 analyzer issues
 
 ## Major Updates & Changes
 
@@ -122,24 +118,25 @@ This file maintains context across development sessions. It records important de
 |---|---|---|
 | Aug 24, 2026 | Initial project planning complete | All 8 planning documents created; ready for development |
 | Aug 24, 2026 | Repository initialized on GitHub | Remote origin configured; ready for collaboration |
-| Aug 24, 2026 | Added .gitignore and CONTRIBUTING.md | Repository now properly configured for Flutter development |
-| Aug 24, 2026 | PR #1 merged to main | .gitignore, CONTRIBUTING.md, and memory.md updates merged |
-| Aug 24, 2026 | Added CI/CD, Edge Functions, localization | 10 files, +1,339 lines on feature/phase1-flutter-setup |
-
----
-
+| Aug 24, 2026 | Added CI/CD, Edge Functions, localization | 10 files, +1,339 lines of infrastructure |
+| Aug 24–25, 2026 | Full Flutter app scaffolded + Phase 1 (Auth) complete | 48 source files; working auth with Supabase, Google OAuth, route guards |
+| Aug 25, 2026 | Phase 2 (Dashboard) complete | Document/folder management, upload, grid/list views, search, sort |
+| Aug 25, 2026 | Phase 3 (Viewer + Annotations) complete | PDF rendering, highlights, sticky notes, undo/redo, spatial canvas workspace |
+| Aug 25–26, 2026 | Phase 4 (AI) complete + bonus features | Summarization, chat, formulas, flashcards, quiz — all wired to Nemotron |
+| Aug 26, 2026 | Phase 5 testing: 81 tests passing | Full unit/widget test coverage across all features, 0 lint warnings |
+| Aug 26, 2026 | Memory.md updated to v2.0 | Project status now accurately reflects actual implementation state |
 ## Open Questions
 
 | # | Question | Status | Resolution |
 |---|---|---|---|
-| Q1 | Should we use GoRouter or auto_route for navigation? | Open | Evaluate during Phase 1 setup |
-| Q2 | Should the onboarding be shown once or repeatable from settings? | Open | Show once by default; add "Replay Onboarding" in Settings |
-| Q3 | What happens when Supabase free tier 1GB storage is exceeded? | Open | Prioritize local Hive; only sync metadata to cloud (not files) |
-| Q4 | Should AI chat support multiple documents in one conversation? | Deferred to V2 | MVP: one document per chat session |
-| Q5 | Should we implement biometric auth (fingerprint/face)? | Deferred to V2 | Not in MVP scope |
-
----
-
+| Q1 | GoRouter vs auto_route? | ✅ Resolved | GoRouter chosen; implemented with named routes and auth guards |
+| Q2 | Onboarding shown once or repeatable? | ✅ Resolved | Onboarding key exists in constants but onboarding screen not yet built; defer to Settings |
+| Q3 | Supabase free tier 1GB exceeded? | Open | Prioritize local Hive; only sync metadata to cloud (not files) |
+| Q4 | Multi-document AI chat? | Deferred to V2 | MVP: one document per chat session |
+| Q5 | Biometric auth? | Deferred to V2 | Not in MVP scope |
+| Q6 | PDF text selection for highlighting? | 🔴 Open (Critical) | pdfx renders images — need custom overlay for text selection; affects highlight feature quality |
+| Q7 | Cloud sync for annotations? | 🔴 Open | All data is local Hive only; need Supabase tables + sync logic |
+| Q8 | Chat history persistence? | 🟡 Open | Chat messages are in-memory only; need Hive persistence |
 ## Learnings & Notes
 
 | Topic | Note |
@@ -167,6 +164,18 @@ This file maintains context across development sessions. It records important de
 
 ---
 
+## Known Gaps
+
+| ID | Gap | Priority | Status |
+|----|-----|----------|--------|
+| G1 | PDF text selection overlay (highlights stored but not rendered on PDF) | High | Not Started |
+| G2 | Cloud sync not verified end-to-end (service exists, not tested on real Puter) | High | Partial |
+| G3 | E2E/integration tests (none exist) | High | Not Started |
+| G4 | Chat history not persisted to Hive (currently in-memory) | Medium | Not Started |
+| G5 | Document thumbnail generation (placeholder only) | Medium | Not Started |
+| G6 | Localization wired to UI (ARB files exist but unused) | Low | Not Started |
+| G7 | Notification service integrated | Low | Not Started |
+
 ## Changelog
 
 | Version | Date | Changes |
@@ -174,3 +183,5 @@ This file maintains context across development sessions. It records important de
 | 1.0 | Aug 24, 2026 | Initial project memory created with all planning decisions documented |
 | 1.1 | Aug 24, 2026 | Updated with repository setup status and new files (.gitignore, CONTRIBUTING.md) |
 | 1.2 | Aug 24, 2026 | Added infrastructure: CI/CD, Edge Functions, localization, GitHub templates |
+| 2.0 | Aug 26, 2026 | Complete status overhaul: all Phases 1-4 done, Phase 5 partial (81 tests), documented known gaps |
+| 3.0 | Aug 26, 2026 | Migrated from Supabase to Puter: removed Supabase auth/Edge Functions/DB, added Puter auth + OpenAI-compatible AI, fixed all identified issues |

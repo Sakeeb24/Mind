@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mindspace/config/constants.dart';
+import 'package:mindspace/config/env.dart';
 import 'package:mindspace/features/document_viewer/data/repositories/hive_annotation_repository.dart';
 import 'package:mindspace/features/document_viewer/domain/entities/highlight.dart';
 import 'package:mindspace/features/document_viewer/domain/entities/sticky_note.dart';
@@ -55,10 +56,14 @@ class AnnotationState {
 }
 
 /// Annotation notifier managing highlights, notes, and undo/redo.
+/// Enforces the 50-action undo/redo limit from env.dart constants.
 class AnnotationNotifier extends Notifier<AnnotationState> {
 
   @override
   AnnotationState build() => const AnnotationState();
+
+  /// Maximum undo/redo stack depth.
+  int get _maxDepth => Env.maxUndoDepth;
 
   void loadAnnotations(String documentId) async {
     final repo = ref.read(annotationRepositoryProvider);
@@ -71,23 +76,50 @@ class AnnotationNotifier extends Notifier<AnnotationState> {
     state = state.copyWith(selectedColor: color);
   }
 
+  /// Push to undo stack, enforcing max depth. Clears redo stack on new action.
+  List<Map<String, Object?>> _pushUndo(Map<String, Object?> entry) {
+    final newStack = List<Map<String, Object?>>.from(state.undoStack)..add(entry);
+    // Enforce max depth — remove oldest entries if over limit
+    while (newStack.length > _maxDepth) {
+      newStack.removeAt(0);
+    }
+    return newStack;
+  }
+
+  /// Safe lookup for a highlight by ID. Returns null if not found.
+  Highlight? _findHighlight(String id) {
+    for (final h in state.highlights) {
+      if (h.id == id) return h;
+    }
+    return null;
+  }
+
+  /// Safe lookup for a sticky note by ID. Returns null if not found.
+  StickyNote? _findNote(String id) {
+    for (final n in state.stickyNotes) {
+      if (n.id == id) return n;
+    }
+    return null;
+  }
+
   Future<void> addHighlight(Highlight highlight) async {
     final repo = ref.read(annotationRepositoryProvider);
     await repo.addHighlight(highlight);
     state = state.copyWith(
       highlights: [...state.highlights, highlight],
-      undoStack: [...state.undoStack, {'type': 'add_highlight', 'data': highlight}],
+      undoStack: _pushUndo({'type': 'add_highlight', 'data': highlight}),
       redoStack: [],
     );
   }
 
   Future<void> deleteHighlight(String id) async {
+    final highlight = _findHighlight(id);
+    if (highlight == null) return; // Safe: no-op if not found
     final repo = ref.read(annotationRepositoryProvider);
-    final highlight = state.highlights.firstWhere((h) => h.id == id);
     await repo.deleteHighlight(id);
     state = state.copyWith(
       highlights: state.highlights.where((h) => h.id != id).toList(),
-      undoStack: [...state.undoStack, {'type': 'delete_highlight', 'data': highlight}],
+      undoStack: _pushUndo({'type': 'delete_highlight', 'data': highlight}),
       redoStack: [],
     );
   }
@@ -97,29 +129,31 @@ class AnnotationNotifier extends Notifier<AnnotationState> {
     await repo.addStickyNote(note);
     state = state.copyWith(
       stickyNotes: [...state.stickyNotes, note],
-      undoStack: [...state.undoStack, {'type': 'add_note', 'data': note}],
+      undoStack: _pushUndo({'type': 'add_note', 'data': note}),
       redoStack: [],
     );
   }
 
   Future<void> updateStickyNote(StickyNote note) async {
+    final oldNote = _findNote(note.id);
+    if (oldNote == null) return; // Safe: no-op if not found
     final repo = ref.read(annotationRepositoryProvider);
     await repo.updateStickyNote(note);
-    final oldNote = state.stickyNotes.firstWhere((n) => n.id == note.id);
     state = state.copyWith(
       stickyNotes: state.stickyNotes.map((n) => n.id == note.id ? note : n).toList(),
-      undoStack: [...state.undoStack, {'type': 'update_note', 'data': oldNote, 'new': note}],
+      undoStack: _pushUndo({'type': 'update_note', 'data': oldNote, 'new': note}),
       redoStack: [],
     );
   }
 
   Future<void> deleteStickyNote(String id) async {
+    final note = _findNote(id);
+    if (note == null) return; // Safe: no-op if not found
     final repo = ref.read(annotationRepositoryProvider);
-    final note = state.stickyNotes.firstWhere((n) => n.id == id);
     await repo.deleteStickyNote(id);
     state = state.copyWith(
       stickyNotes: state.stickyNotes.where((n) => n.id != id).toList(),
-      undoStack: [...state.undoStack, {'type': 'delete_note', 'data': note}],
+      undoStack: _pushUndo({'type': 'delete_note', 'data': note}),
       redoStack: [],
     );
   }
@@ -216,7 +250,7 @@ class AnnotationNotifier extends Notifier<AnnotationState> {
       case 'update_note':
         final newNote = last['new'] as StickyNote;
         await repo.updateStickyNote(newNote);
-            state = state.copyWith(
+        state = state.copyWith(
           stickyNotes: state.stickyNotes.map((n) => n.id == newNote.id ? newNote : n).toList(),
           undoStack: [...state.undoStack, last],
           redoStack: newRedo,

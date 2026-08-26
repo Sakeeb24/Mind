@@ -546,12 +546,6 @@ class _UploadProgressDialogState extends State<_UploadProgressDialog> {
       });
 
       final doc = await FileUploadService.processUpload(result);
-      if (doc == null) {
-        setState(() {
-          _error = 'Failed to process document file.';
-        });
-        return;
-      }
 
       setState(() {
         _status = 'Finalizing document ingestion...';

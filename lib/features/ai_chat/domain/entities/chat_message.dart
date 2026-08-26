@@ -29,6 +29,28 @@ class ChatMessage {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'documentId': documentId,
+        'role': role,
+        'content': content,
+        'citations': citations,
+        'modelUsed': modelUsed,
+        'createdAt': createdAt.toIso8601String(),
+      };
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      id: json['id']?.toString() ?? '',
+      documentId: json['documentId']?.toString() ?? '',
+      role: json['role']?.toString() ?? 'user',
+      content: json['content']?.toString() ?? '',
+      citations: (json['citations'] as List?)?.map((e) => e.toString()).toList(),
+      modelUsed: json['modelUsed']?.toString(),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

@@ -229,7 +229,7 @@ class CanvasNotifier extends Notifier<CanvasState> {
 
   Future<void> updateCardContent(String cardId, String content, {String? title}) async {
     final repo = ref.read(canvasRepositoryProvider);
-    final card = state.cards.firstWhere((c) => c.id == cardId);
+    final card = state.cards.firstWhere((c) => c.id == cardId, orElse: () => throw Exception('Card not found: $cardId'));
     final updated = card.copyWith(content: content, title: title ?? card.title);
     await repo.saveCard(updated);
     state = state.copyWith(
@@ -253,7 +253,7 @@ class CanvasNotifier extends Notifier<CanvasState> {
   Future<void> toggleConnection(String fromCardId, String toCardId) async {
     if (fromCardId == toCardId) return;
     final repo = ref.read(canvasRepositoryProvider);
-    final fromCard = state.cards.firstWhere((c) => c.id == fromCardId);
+    final fromCard = state.cards.firstWhere((c) => c.id == fromCardId, orElse: () => throw Exception('Card not found: $fromCardId'));
     final currentLinks = List<String>.from(fromCard.connectedCardIds);
 
     if (currentLinks.contains(toCardId)) {
@@ -279,7 +279,7 @@ class CanvasNotifier extends Notifier<CanvasState> {
   }
 
   Future<void> updateCardColor(String cardId, String color) async {
-    final card = state.cards.firstWhere((c) => c.id == cardId);
+    final card = state.cards.firstWhere((c) => c.id == cardId, orElse: () => throw Exception('Card not found: $cardId'));
     final repo = ref.read(canvasRepositoryProvider);
     final updated = card.copyWith(color: color);
     await repo.saveCard(updated);
@@ -297,7 +297,7 @@ class CanvasNotifier extends Notifier<CanvasState> {
 
   /// AI Supercharger: Run AI explanation / synthesis on a specific excerpt card
   Future<void> explainCardWithAi(String cardId, {AIService? aiService}) async {
-    final card = state.cards.firstWhere((c) => c.id == cardId);
+    final card = state.cards.firstWhere((c) => c.id == cardId, orElse: () => throw Exception('Card not found: $cardId'));
     state = state.copyWith(isAiProcessingCardId: cardId);
 
     try {

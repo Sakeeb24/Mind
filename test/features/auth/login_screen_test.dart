@@ -24,10 +24,7 @@ class FakeAuthRepository implements AuthRepository {
     return User(id: 'test', email: email);
   }
 
-  @override
-  Future<User> signInWithGoogle() async {
-    return const User(id: 'google', email: 'user@gmail.com');
-  }
+
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {}
@@ -65,12 +62,6 @@ void main() {
     await tester.pumpWidget(buildTestApp());
     await tester.pumpAndSettle();
     expect(find.text('Sign In'), findsOneWidget);
-  });
-
-  testWidgets('LoginScreen renders Google sign in button', (tester) async {
-    await tester.pumpWidget(buildTestApp());
-    await tester.pumpAndSettle();
-    expect(find.text('Continue with Google'), findsOneWidget);
   });
 
   testWidgets('LoginScreen renders forgot password link', (tester) async {

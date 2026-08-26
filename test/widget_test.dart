@@ -22,10 +22,7 @@ class FakeAuthRepository implements AuthRepository {
     return User(id: 'test', email: email);
   }
 
-  @override
-  Future<User> signInWithGoogle() async {
-    return const User(id: 'google', email: 'user@gmail.com');
-  }
+
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {}

@@ -8,6 +8,7 @@ import 'package:mindspace/features/ai_chat/presentation/widgets/chat_input_bar.d
 import 'package:mindspace/features/ai_chat/presentation/widgets/typing_indicator.dart';
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
 import 'package:mindspace/features/document_viewer/presentation/widgets/study_features_dialogs.dart';
+import 'package:mindspace/services/ai/ai_usage_tracker.dart';
 
 class AiChatScreen extends ConsumerStatefulWidget {
   const AiChatScreen({super.key, required this.document});
@@ -133,7 +134,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                 const Icon(Icons.bolt_rounded, size: 13, color: AppColors.amberGold),
                 const SizedBox(width: 4),
                 Text(
-                  '${chatState.remainingQueries}/20',
+                  '${AiUsageTracker.getRemaining()}/20',
                   style: GoogleFonts.jetBrainsMono(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -250,7 +251,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Nemotron AI will provide grounded explanations, formula breakdowns, and source citations.',
+                            'Puter AI will provide grounded explanations, formula breakdowns, and source citations.',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 13,
                               color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,

@@ -1,16 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mindspace/core/errors/app_exception.dart';
 import 'package:mindspace/services/ai/ai_service.dart';
-import 'package:mindspace/services/ai/nemotron_service.dart';
+import 'package:mindspace/services/ai/puter_ai_service.dart';
 
 void main() {
-  group('NemotronAIService & Study Models', () {
-    late NemotronAIService service;
+  group('PuterAIService & Study Models', () {
+    late PuterAIService service;
     late Dio dio;
 
     setUp(() {
-      dio = Dio(BaseOptions(baseUrl: 'https://mock.supabase.co'));
-      service = NemotronAIService(dio);
+      dio = Dio(BaseOptions(baseUrl: 'https://api.puter.com'));
+      service = PuterAIService(dio);
     });
 
     test('FormulaDefinition model instantiation', () {
@@ -66,37 +67,35 @@ void main() {
       expect(quizQ.explanation, contains('softmax'));
     });
 
-    test('Fallback logic generates structured flashcards on offline/failure', () async {
-      final cards = await service.generateFlashcards(
-        documentText: 'Document: Transformer Architecture\nPages: 10',
-        count: 5,
+    test('Throws AiException when API token is not configured', () async {
+      // With no token configured, all AI calls should throw proper errors
+      expect(
+        () => service.generateFlashcards(
+          documentText: 'Document: Transformer Architecture\nPages: 10',
+          count: 5,
+        ),
+        throwsA(isA<AppException>()),
       );
-
-      expect(cards.length, 5);
-      expect(cards.first.question, isNotEmpty);
-      expect(cards.first.answer, isNotEmpty);
     });
 
-    test('Fallback logic generates structured quiz questions on offline/failure', () async {
-      final quiz = await service.generateQuiz(
-        documentText: 'Document: Quantum Computing\nPages: 8',
-        questionCount: 5,
+    test('Throws AiException for quiz generation without token', () async {
+      expect(
+        () => service.generateQuiz(
+          documentText: 'Document: Quantum Computing\nPages: 8',
+          questionCount: 5,
+        ),
+        throwsA(isA<AppException>()),
       );
-
-      expect(quiz.length, 5);
-      expect(quiz.first.options.length, 4);
-      expect(quiz.first.correctIndex, inInclusiveRange(0, 3));
     });
 
-    test('Fallback logic extracts formulas and definitions on offline/failure', () async {
-      final formulas = await service.extractFormulasAndDefinitions(
-        documentText: 'Document: Deep Learning Foundations\nPages: 12',
-        pageNumber: 2,
+    test('Throws AiException for formula extraction without token', () async {
+      expect(
+        () => service.extractFormulasAndDefinitions(
+          documentText: 'Document: Deep Learning Foundations\nPages: 12',
+          pageNumber: 2,
+        ),
+        throwsA(isA<AppException>()),
       );
-
-      expect(formulas, isNotEmpty);
-      expect(formulas.first.title, isNotEmpty);
-      expect(formulas.first.formulaOrDefinition, isNotEmpty);
     });
   });
 }

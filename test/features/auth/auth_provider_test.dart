@@ -51,16 +51,7 @@ class MockAuthRepository implements AuthRepository {
     return user;
   }
 
-  @override
-  Future<User> signInWithGoogle() async {
-    final user = User(
-      id: 'google-id',
-      email: 'user@gmail.com',
-      displayName: 'Google User',
-    );
-    setUser(user);
-    return user;
-  }
+
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
@@ -147,11 +138,6 @@ void main() {
       );
     });
 
-    test('signInWithGoogle returns Google user', () async {
-      final user = await repo.signInWithGoogle();
-      expect(user.email, 'user@gmail.com');
-      expect(user.displayName, 'Google User');
-    });
 
     test('signOut clears current user', () async {
       await repo.signInWithEmail(email: 'test@test.com', password: 'pass');

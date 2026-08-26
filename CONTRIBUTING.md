@@ -26,7 +26,7 @@ Before you begin, ensure you have:
 - [Dart SDK](https://dart.dev/get-dart) 3.5+ (included with Flutter)
 - [Git](https://git-scm.com/) 2.30+
 - [VS Code](https://code.visualstudio.com/) or [Android Studio](https://developer.android.com/studio) with Flutter/Dart plugins
-- A [Supabase](https://supabase.com) account (free tier)
+- A [Puter](https://puter.com) account (free tier)
 - An [NVIDIA](https://build.nvidia.com) account for AI API keys
 
 ### Fork & Clone
@@ -56,13 +56,13 @@ Before you begin, ensure you have:
 
 3. Configure environment variables:
    - Copy `lib/config/env.dart.example` to `lib/config/env.dart`
-   - Add your Supabase credentials
+   - Add your Puter credentials
    - **Never commit API keys**
 
-4. Set up Supabase:
-   - Create a project at [supabase.com](https://supabase.com)
+4. Set up Puter:
+   - Create a project at [puter.com](https://puter.com)
    - Run the database schema from `architecture.md` (Section 6.1)
-   - Enable Email and Google auth providers
+   - Configure Puter auth token in env.dart
 
 5. Run the app:
    ```bash
@@ -205,11 +205,11 @@ flutter test --coverage
 ### Examples
 
 ```
-feat(auth): add Google Sign-In integration
+feat(auth): add Puter token sign-in integration
 fix(viewer): resolve crash on 200+ page PDFs
 docs(prd): update monetization strategy
 test(chat): add unit tests for chat provider
-chore(deps): upgrade supabase_flutter to 2.8.0
+chore(deps): upgrade puter_flutter to 2.8.0
 ```
 
 ### Rules
@@ -263,7 +263,7 @@ chore(deps): upgrade supabase_flutter to 2.8.0
 
 Match commit message format:
 ```
-feat(auth): add Google Sign-In integration
+feat(auth): add Puter token sign-in integration
 ```
 
 ### PR Size Guidelines

@@ -43,17 +43,6 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<User> signInWithGoogle() async {
-    _currentUser = const User(
-      id: 'mock-google-id',
-      email: 'test@google.com',
-      displayName: 'Google User',
-    );
-    _controller.add(_currentUser);
-    return _currentUser!;
-  }
-
-  @override
   Future<void> sendPasswordResetEmail(String email) async {}
 
   @override

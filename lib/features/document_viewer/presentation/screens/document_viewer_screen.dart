@@ -50,7 +50,7 @@ class _DocumentViewerScreenState extends ConsumerState<DocumentViewerScreen> {
   Future<void> _initPdf() async {
     try {
       if (kIsWeb) {
-        final bytes = FileUploadService.webBytesCache[widget.document.filePath];
+        final bytes = FileUploadService.loadWebPdfBytes(widget.document.filePath);
         if (bytes != null) {
           _pdfController = PdfController(
             document: PdfDocument.openData(bytes),

@@ -6,7 +6,6 @@ import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
 import 'package:mindspace/features/auth/presentation/widgets/auth_form.dart';
-import 'package:mindspace/features/auth/presentation/widgets/social_login_buttons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -24,11 +23,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (_email == null || _password == null) return;
     setState(() => _isLoading = true);
     ref.read(authProvider.notifier).signInWithEmail(_email!, _password!);
-  }
-
-  void _handleGoogleSignIn() {
-    setState(() => _isLoading = true);
-    ref.read(authProvider.notifier).signInWithGoogle();
   }
 
   @override
@@ -51,7 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const SizedBox(height: AppSpacing.xxl),
 
-              // Logo — fades in first
+              // Logo
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 100),
                 child: Semantics(label: 'MindSpace logo', child: const Icon(Icons.menu_book_rounded, size: 72, color: AppColors.primary)),
@@ -81,7 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // Form — slides up
+              // Form
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 350),
                 child: AuthForm(
@@ -126,22 +120,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.lg),
-
-              // Social login
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 500),
-                child: SocialLoginButtons(
-                  onGoogleTap: _handleGoogleSignIn,
-                  isLoading: _isLoading,
-                ),
-              ),
-
               const SizedBox(height: AppSpacing.xl),
 
               // Sign up link
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 550),
+                delay: const Duration(milliseconds: 500),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

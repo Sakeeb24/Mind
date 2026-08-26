@@ -6,7 +6,6 @@ import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
 import 'package:mindspace/features/auth/presentation/widgets/auth_form.dart';
-import 'package:mindspace/features/auth/presentation/widgets/social_login_buttons.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -25,11 +24,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (_email == null || _password == null) return;
     setState(() => _isLoading = true);
     ref.read(authProvider.notifier).signUpWithEmail(_email!, _password!, displayName: _name);
-  }
-
-  void _handleGoogleSignUp() {
-    setState(() => _isLoading = true);
-    ref.read(authProvider.notifier).signInWithGoogle();
   }
 
   @override
@@ -113,22 +107,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.lg),
-
-              // Social login
-              AnimatedFadeIn(
-                delay: const Duration(milliseconds: 500),
-                child: SocialLoginButtons(
-                  onGoogleTap: _handleGoogleSignUp,
-                  isLoading: _isLoading,
-                ),
-              ),
-
               const SizedBox(height: AppSpacing.xl),
 
               // Sign in link
               AnimatedFadeIn(
-                delay: const Duration(milliseconds: 550),
+                delay: const Duration(milliseconds: 500),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
