@@ -85,6 +85,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 350),
                 child: AuthForm(
+                  onChanged: (email, password, _) {
+                    _email = email;
+                    _password = password;
+                  },
                   onSubmit: (email, password, _) {
                     _email = email;
                     _password = password;

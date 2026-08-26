@@ -6,11 +6,13 @@ class AuthForm extends StatefulWidget {
   const AuthForm({
     super.key,
     required this.onSubmit,
+    this.onChanged,
     this.showNameField = false,
     this.submitLabel = 'Sign In',
   });
 
   final void Function(String email, String password, String? name) onSubmit;
+  final void Function(String email, String password, String? name)? onChanged;
   final bool showNameField;
   final String submitLabel;
 
@@ -26,7 +28,26 @@ class _AuthFormState extends State<AuthForm> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_notifyChanged);
+    _passwordController.addListener(_notifyChanged);
+    _nameController.addListener(_notifyChanged);
+  }
+
+  void _notifyChanged() {
+    widget.onChanged?.call(
+      _emailController.text,
+      _passwordController.text,
+      _nameController.text.isEmpty ? null : _nameController.text,
+    );
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_notifyChanged);
+    _passwordController.removeListener(_notifyChanged);
+    _nameController.removeListener(_notifyChanged);
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
@@ -45,6 +66,7 @@ class _AuthFormState extends State<AuthForm> {
               label: 'Full Name',
               prefixIcon: const Icon(Icons.person_outline),
               validator: (v) => Validators.required(v, 'Name'),
+              onFieldSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 16),
           ],
@@ -54,6 +76,7 @@ class _AuthFormState extends State<AuthForm> {
             prefixIcon: const Icon(Icons.email_outlined),
             keyboardType: TextInputType.emailAddress,
             validator: Validators.email,
+            onFieldSubmitted: (_) => _submit(),
           ),
           const SizedBox(height: 16),
           AppTextField(
@@ -66,9 +89,20 @@ class _AuthFormState extends State<AuthForm> {
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
             ),
             validator: Validators.password,
+            onFieldSubmitted: (_) => _submit(),
           ),
         ],
       ),
     );
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() ?? false) {
+      widget.onSubmit(
+        _emailController.text.trim(),
+        _passwordController.text,
+        _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+      );
+    }
   }
 }

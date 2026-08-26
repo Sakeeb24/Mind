@@ -22,6 +22,7 @@ class AppConstants {
   static const String chatHistoryBox = 'chat_history';
   static const String settingsBox = 'settings';
   static const String summariesBox = 'summaries';
+  static const String canvasCardsBox = 'canvas_cards';
 
   // Storage Keys
   static const String themeModeKey = 'theme_mode';

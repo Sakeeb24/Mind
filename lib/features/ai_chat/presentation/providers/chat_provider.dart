@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindspace/features/ai_chat/domain/entities/chat_message.dart';
 import 'package:mindspace/services/ai/ai_service.dart';
-import 'package:mindspace/services/ai/nemotron_service.dart';
+import 'package:mindspace/providers/ai_service_provider.dart';
 
 /// Chat state.
 class ChatState {
@@ -28,9 +28,10 @@ class ChatState {
 }
 
 /// Chat notifier managing message history and AI responses.
-class ChatNotifier extends Notifier<ChatState> {
-  @override
-  ChatState build() => const ChatState();
+class ChatNotifier extends StateNotifier<ChatState> {
+  final AIService _aiService;
+
+  ChatNotifier(this._aiService) : super(const ChatState());
 
   Future<void> sendMessage({
     required String documentId,
@@ -59,13 +60,12 @@ class ChatNotifier extends Notifier<ChatState> {
     );
 
     try {
-      final aiService = MockAIService();
       final chatHistory = state.messages
           .where((m) => m.documentId == documentId)
           .map((m) => AIChatMessage(role: m.role, content: m.content))
           .toList();
 
-      final response = await aiService.chat(
+      final response = await _aiService.chat(
         documentText: documentText,
         question: question,
         chatHistory: chatHistory,
@@ -103,6 +103,6 @@ class ChatNotifier extends Notifier<ChatState> {
   }
 }
 
-final chatProvider = NotifierProvider<ChatNotifier, ChatState>(
-  ChatNotifier.new,
-);
+final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
+  return ChatNotifier(ref.read(aiServiceProvider));
+});

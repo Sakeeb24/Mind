@@ -1,51 +1,102 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mindspace/services/ai/ai_service.dart';
 import 'package:mindspace/services/ai/nemotron_service.dart';
 
 void main() {
-  group('MockAIService', () {
-    late MockAIService service;
+  group('NemotronAIService & Study Models', () {
+    late NemotronAIService service;
+    late Dio dio;
 
     setUp(() {
-      service = MockAIService();
+      dio = Dio(BaseOptions(baseUrl: 'https://mock.supabase.co'));
+      service = NemotronAIService(dio);
     });
 
-    test('extractText returns simulated text', () async {
-      final result = await service.extractText(['image1', 'image2']);
-      expect(result, contains('2 pages'));
-      expect(result, isNotEmpty);
-    });
-
-    test('summarize returns summary for page scope', () async {
-      final result = await service.summarize(
-        documentText: 'This is a test document about Flutter development',
-        scope: 'page',
+    test('FormulaDefinition model instantiation', () {
+      const formula = FormulaDefinition(
+        id: 'f-1',
+        title: 'Attention Mechanism',
+        formulaOrDefinition: r'\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V',
+        explanation: 'Computes scaled dot-product attention across Query, Key, and Value vectors.',
+        type: 'formula',
+        pageNumber: 3,
       );
-      expect(result, contains('Summary (page)'));
-      expect(result, isNotEmpty);
+
+      expect(formula.id, 'f-1');
+      expect(formula.title, 'Attention Mechanism');
+      expect(formula.type, 'formula');
+      expect(formula.pageNumber, 3);
+      expect(formula.formulaOrDefinition, contains('softmax'));
     });
 
-    test('summarize returns summary for selection scope', () async {
-      final result = await service.summarize(
-        documentText: 'Full document text here',
-        scope: 'selection',
-        selectedText: 'Selected portion of text',
+    test('FlashcardItem model instantiation', () {
+      const card = FlashcardItem(
+        id: 'fc-1',
+        question: 'What does Self-Attention allow a model to do?',
+        answer: 'Relate different positions of a single sequence in order to compute a representation.',
+        keyConcept: 'Self-Attention',
+        pageNumber: 4,
       );
-      expect(result, contains('selection'));
+
+      expect(card.id, 'fc-1');
+      expect(card.question, contains('Self-Attention'));
+      expect(card.answer, isNotEmpty);
+      expect(card.pageNumber, 4);
     });
 
-    test('chat returns response with citations', () async {
-      final result = await service.chat(
-        documentText: 'Document about AI',
-        question: 'What is AI?',
+    test('QuizQuestionItem model instantiation', () {
+      const quizQ = QuizQuestionItem(
+        id: 'q-1',
+        question: 'Why is the dot product scaled by 1/sqrt(d_k)?',
+        options: [
+          'To prevent vanishing gradients for large dimensions',
+          'To make matrix multiplication faster',
+          'To reduce memory footprint',
+          'To normalize output logits to zero',
+        ],
+        correctIndex: 0,
+        explanation: 'For large values of d_k, dot products grow large in magnitude, pushing softmax into regions with small gradients.',
+        pageNumber: 4,
       );
-      expect(result.answer, isNotEmpty);
-      expect(result.citations, isNotEmpty);
-      expect(result.confidence, greaterThan(0));
+
+      expect(quizQ.id, 'q-1');
+      expect(quizQ.options.length, 4);
+      expect(quizQ.correctIndex, 0);
+      expect(quizQ.explanation, contains('softmax'));
     });
 
-    test('getRemainingQueries returns count', () async {
-      final count = await service.getRemainingQueries();
-      expect(count, greaterThanOrEqualTo(0));
+    test('Fallback logic generates structured flashcards on offline/failure', () async {
+      final cards = await service.generateFlashcards(
+        documentText: 'Document: Transformer Architecture\nPages: 10',
+        count: 5,
+      );
+
+      expect(cards.length, 5);
+      expect(cards.first.question, isNotEmpty);
+      expect(cards.first.answer, isNotEmpty);
+    });
+
+    test('Fallback logic generates structured quiz questions on offline/failure', () async {
+      final quiz = await service.generateQuiz(
+        documentText: 'Document: Quantum Computing\nPages: 8',
+        questionCount: 5,
+      );
+
+      expect(quiz.length, 5);
+      expect(quiz.first.options.length, 4);
+      expect(quiz.first.correctIndex, inInclusiveRange(0, 3));
+    });
+
+    test('Fallback logic extracts formulas and definitions on offline/failure', () async {
+      final formulas = await service.extractFormulasAndDefinitions(
+        documentText: 'Document: Deep Learning Foundations\nPages: 12',
+        pageNumber: 2,
+      );
+
+      expect(formulas, isNotEmpty);
+      expect(formulas.first.title, isNotEmpty);
+      expect(formulas.first.formulaOrDefinition, isNotEmpty);
     });
   });
 }

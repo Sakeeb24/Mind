@@ -29,6 +29,7 @@ Future<void> main() async {
   await Hive.openBox(AppConstants.chatHistoryBox);
   await Hive.openBox(AppConstants.settingsBox);
   await Hive.openBox(AppConstants.summariesBox);
+  await Hive.openBox(AppConstants.canvasCardsBox);
 
   final supabaseClient = Supabase.instance.client;
 

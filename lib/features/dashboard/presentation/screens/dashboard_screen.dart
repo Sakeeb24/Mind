@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:mindspace/features/document_viewer/presentation/screens/document_viewer_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mindspace/config/theme.dart';
 import 'package:mindspace/core/services/file_upload_service.dart';
-import 'package:mindspace/core/widgets/app_button.dart';
-import 'package:mindspace/core/widgets/app_text_field.dart';
-import 'package:mindspace/core/widgets/confirm_dialog.dart';
+import 'package:mindspace/core/widgets/mindspace_components.dart';
+import 'package:mindspace/features/ai_chat/presentation/screens/ai_chat_screen.dart';
 import 'package:mindspace/features/dashboard/domain/entities/document.dart';
 import 'package:mindspace/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:mindspace/features/dashboard/presentation/widgets/document_card.dart';
 import 'package:mindspace/features/dashboard/presentation/widgets/empty_dashboard.dart';
 import 'package:mindspace/features/dashboard/presentation/widgets/folder_card.dart';
-import 'package:mindspace/features/dashboard/presentation/widgets/upload_button.dart';
+import 'package:mindspace/features/document_viewer/presentation/screens/document_viewer_screen.dart';
+import 'package:mindspace/features/document_viewer/presentation/widgets/study_features_dialogs.dart';
 import 'package:mindspace/features/folders/domain/entities/folder.dart';
 import 'package:mindspace/features/folders/presentation/providers/folder_provider.dart';
 
@@ -34,20 +34,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   void _showCreateFolderDialog() {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Folder'),
-        content: AppTextField(
+        backgroundColor: isDark ? AppColors.navySlate : AppColors.lightSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+          ),
+        ),
+        title: Text(
+          'Create Folder',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+        ),
+        content: TextField(
           controller: controller,
-          label: 'Folder Name',
-          prefixIcon: const Icon(Icons.folder),
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Folder Name',
+            hintText: 'e.g. Machine Learning, Neuroscience',
+            prefixIcon: Icon(Icons.folder_outlined),
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
             onPressed: () {
-              if (controller.text.isNotEmpty) {
+              if (controller.text.trim().isNotEmpty) {
                 ref.read(folderProvider.notifier).addFolder(controller.text.trim());
                 Navigator.pop(context);
               }
@@ -60,37 +79,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _handleUpload() async {
-    Navigator.pop(context); // Close dialog
-    final result = await FileUploadService.pickPdf();
-    if (result != null) {
-      final doc = await FileUploadService.processUpload(result);
-      if (doc != null) {
-        ref.read(dashboardProvider.notifier).addDocument(doc);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Uploaded ${doc.title}'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      }
-    }
-  }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  void _showUploadDialog() {
+    // Show Stitch upload progress modal
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Upload PDF'),
-        content: const Text('Select a PDF file from your device.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(
-            onPressed: _handleUpload,
-            child: const Text('Select File'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (dialogCtx) => _UploadProgressDialog(
+        isDark: isDark,
+        onDocumentReady: (doc) {
+          ref.read(dashboardProvider.notifier).addDocument(doc);
+          Navigator.pop(dialogCtx);
+
+          // Automatically open the document workspace
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DocumentViewerScreen(document: doc),
+            ),
+          );
+        },
       ),
     );
   }
@@ -99,20 +107,103 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final dashboardState = ref.watch(dashboardProvider);
     final folders = ref.watch(folderProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final selectedFolderName = dashboardState.selectedFolderId != null
+        ? folders
+            .firstWhere(
+              (f) => f.id == dashboardState.selectedFolderId,
+              orElse: () => Folder(id: '', name: 'Folder', createdAt: DateTime.now()),
+            )
+            .name
+        : null;
+
+    final totalDocuments = dashboardState.documents.length;
+    final filteredDocs = dashboardState.filteredDocuments;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.obsidian : AppColors.lightBackground,
       appBar: AppBar(
-        title: Text(dashboardState.selectedFolderId != null
-            ? folders.firstWhere((f) => f.id == dashboardState.selectedFolderId, orElse: () => Folder(id: '', name: 'Folder', createdAt: DateTime.now())).name
-            : 'MindSpace'),
+        backgroundColor: isDark ? AppColors.navySlate : AppColors.lightSurface,
+        elevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(isDark ? 40 : 20),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.auto_awesome, color: AppColors.cyanGlow, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              selectedFolderName ?? 'MindSpace',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+              ),
+            ),
+            if (selectedFolderName != null) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(30),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Folder',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         actions: [
+          // Remaining Daily AI Queries Badge
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceContainerLow : AppColors.lightSurfaceVariant,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+                width: 0.8,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bolt_rounded, size: 14, color: AppColors.amberGold),
+                const SizedBox(width: 4),
+                Text(
+                  '18/20 Queries',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
           IconButton(
-            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+            icon: Icon(
+              _isGridView ? Icons.view_list : Icons.grid_view,
+              size: 20,
+            ),
             tooltip: _isGridView ? 'Switch to list view' : 'Switch to grid view',
             onPressed: () => setState(() => _isGridView = !_isGridView),
           ),
           PopupMenuButton<SortOption>(
-            icon: const Icon(Icons.sort),
+            icon: const Icon(Icons.sort, size: 20),
             tooltip: 'Sort documents',
             onSelected: (option) => ref.read(dashboardProvider.notifier).setSort(option),
             itemBuilder: (context) => [
@@ -122,38 +213,271 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const PopupMenuItem(value: SortOption.size, child: Text('Size')),
             ],
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
-          // Search bar
+          // Search bar & Header Controls
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: AppTextField(
-              controller: _searchController,
-              label: 'Search documents',
-              prefixIcon: const Icon(Icons.search),
-              onChanged: (value) => ref.read(dashboardProvider.notifier).setSearch(value),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) => ref.read(dashboardProvider.notifier).setSearch(value),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Search documents',
+                      prefixIcon: const Icon(Icons.search, size: 18),
+                      suffixIcon: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.surfaceContainerHigh : Colors.black12,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '⌘K',
+                          style: GoogleFonts.jetBrainsMono(fontSize: 10, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: _handleUpload,
+                  icon: const Icon(Icons.upload_file_rounded, size: 18),
+                  label: const Text('Upload PDF'),
+                ),
+              ],
             ),
           ),
-          // Back to all button if in folder
+
+          // Quick Study Stats Row (Stitch Specs)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: MindSpaceStudyMetric(
+                    label: 'Documents',
+                    value: '$totalDocuments',
+                    icon: Icons.description_outlined,
+                    accentColor: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: MindSpaceStudyMetric(
+                    label: 'Highlights',
+                    value: '148',
+                    icon: Icons.edit_note_outlined,
+                    accentColor: AppColors.cyanGlow,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: MindSpaceStudyMetric(
+                    label: 'Streak',
+                    value: '7 Days',
+                    icon: Icons.local_fire_department_outlined,
+                    accentColor: AppColors.amberGold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: MindSpaceStudyMetric(
+                    label: 'Decks',
+                    value: '4',
+                    icon: Icons.style_outlined,
+                    accentColor: AppColors.success,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Folder breadcrumb (if inside folder)
           if (dashboardState.selectedFolderId != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: () => ref.read(dashboardProvider.notifier).setFolder(null),
                   icon: const Icon(Icons.arrow_back, size: 16),
-                  label: const Text('All Documents'),
+                  label: Text(
+                    'All Documents',
+                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             ),
-          // Content
+
+          // Main Study Content Area
           Expanded(
-            child: dashboardState.filteredDocuments.isEmpty && folders.isEmpty
-                ? EmptyDashboard(onUpload: _showUploadDialog)
-                : _buildContent(dashboardState, folders),
+            child: filteredDocs.isEmpty && folders.isEmpty
+                ? EmptyDashboard(onUpload: _handleUpload)
+                : CustomScrollView(
+                    slivers: [
+                      // Folders Grid (if any)
+                      if (folders.isNotEmpty && dashboardState.selectedFolderId == null) ...[
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Folders',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: _showCreateFolderDialog,
+                                  icon: const Icon(Icons.add, size: 14),
+                                  label: const Text('New Folder', style: TextStyle(fontSize: 12)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220,
+                              mainAxisExtent: 90,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final folder = folders[index];
+                                return FolderCard(
+                                  folder: folder,
+                                  documentCount: dashboardState.documents
+                                      .where((d) => d.folderId == folder.id)
+                                      .length,
+                                  onTap: () => ref.read(dashboardProvider.notifier).setFolder(folder.id),
+                                );
+                              },
+                              childCount: folders.length,
+                            ),
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                      ],
+
+                      // Documents Grid / List
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Study Library (${filteredDocs.length})',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      if (_isGridView)
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          sliver: SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 320,
+                              mainAxisExtent: 240,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final doc = filteredDocs[index];
+                                return DocumentCard(
+                                  document: doc,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => DocumentViewerScreen(document: doc),
+                                      ),
+                                    );
+                                  },
+                                  onSummaryTap: () {
+                                    StudyFeaturesDialogs.showSummaryDialog(
+                                      context: context,
+                                      ref: ref,
+                                      document: doc,
+                                    );
+                                  },
+                                  onChatTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => AiChatScreen(document: doc),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              childCount: filteredDocs.length,
+                            ),
+                          ),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final doc = filteredDocs[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppColors.navySlate : AppColors.lightSurface,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+                                    ),
+                                  ),
+                                  child: ListTile(
+                                    leading: const Icon(Icons.picture_as_pdf_rounded, color: AppColors.cyanGlow),
+                                    title: Text(doc.title, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600)),
+                                    subtitle: Text('${doc.pageCount} pages · ${doc.fileSizeFormatted}'),
+                                    trailing: const Icon(Icons.chevron_right_rounded),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DocumentViewerScreen(document: doc),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                              childCount: filteredDocs.length,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -161,252 +485,149 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton.small(
-            heroTag: 'folder',
+            heroTag: 'create_folder_fab',
             onPressed: _showCreateFolderDialog,
-            backgroundColor: AppColors.lightSurface,
-            child: const Icon(Icons.create_new_folder),
+            tooltip: 'Create Folder',
+            backgroundColor: isDark ? AppColors.surfaceContainerHigh : AppColors.lightSurface,
+            child: const Icon(Icons.create_new_folder_outlined, color: AppColors.cyanGlow),
           ),
-          const SizedBox(height: 8),
-          UploadButton(onPressed: _showUploadDialog),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'upload_pdf_fab',
+            onPressed: _handleUpload,
+            tooltip: 'Upload Document',
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildContent(DashboardState state, List<Folder> folders) {
-    final docs = state.filteredDocuments;
+// ────────────────────────────────────────────────────────────
+// STITCH UPLOAD PROGRESS DIALOG
+// ────────────────────────────────────────────────────────────
+class _UploadProgressDialog extends StatefulWidget {
+  const _UploadProgressDialog({
+    required this.isDark,
+    required this.onDocumentReady,
+  });
 
-    return CustomScrollView(
-      slivers: [
-        // Folders section
-        if (folders.isNotEmpty && state.selectedFolderId == null) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.sm),
-              child: Text('FOLDERS', style: AppTypography.labelLarge.copyWith(color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 80,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: folders.length,
-                itemBuilder: (context, index) {
-                  final folder = folders[index];
-                  final count = state.documents.where((d) => d.folderId == folder.id).length;
-                  return SizedBox(
-                    width: 160,
-                    child: FolderCard(
-                      folder: folder,
-                      documentCount: count,
-                      onTap: () => ref.read(dashboardProvider.notifier).setFolder(folder.id),
-                      onLongPress: () => _showFolderOptions(folder),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-        // Documents header — Taste Skill: Label style with breathing space
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, AppSpacing.sm),
-            child: Text('DOCUMENTS', style: AppTypography.labelLarge.copyWith(color: AppColors.lightTextTertiary, letterSpacing: 0.8)),
-          ),
+  final bool isDark;
+  final ValueChanged<Document> onDocumentReady;
+
+  @override
+  State<_UploadProgressDialog> createState() => _UploadProgressDialogState();
+}
+
+class _UploadProgressDialogState extends State<_UploadProgressDialog> {
+  String _status = 'Selecting document...';
+  double _progress = 0.2;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _startUpload();
+  }
+
+  Future<void> _startUpload() async {
+    try {
+      final result = await FileUploadService.pickPdf();
+      if (result == null) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+
+      setState(() {
+        _status = 'Parsing PDF structure & pages...';
+        _progress = 0.6;
+      });
+
+      final doc = await FileUploadService.processUpload(result);
+      if (doc == null) {
+        setState(() {
+          _error = 'Failed to process document file.';
+        });
+        return;
+      }
+
+      setState(() {
+        _status = 'Finalizing document ingestion...';
+        _progress = 1.0;
+      });
+
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        widget.onDocumentReady(doc);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Upload error: $e';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: widget.isDark ? AppColors.navySlate : AppColors.lightSurface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: widget.isDark ? AppColors.whisperBorder : AppColors.lightDivider,
         ),
-        // Documents grid or list
-        if (docs.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.picture_as_pdf_outlined, size: 48, color: AppColors.lightTextTertiary),
-                  const SizedBox(height: AppSpacing.md),
-                  Text('No documents yet', style: AppTypography.titleMedium.copyWith(color: AppColors.lightTextSecondary)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text('Upload your first PDF to get started', style: AppTypography.bodyMedium.copyWith(color: AppColors.lightTextTertiary)),
-                  const SizedBox(height: AppSpacing.lg),
-                  AppButton(onPressed: _showUploadDialog, label: 'Upload PDF', variant: AppButtonVariant.secondary),
-                ],
+      ),
+      content: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(widget.isDark ? 30 : 15),
+                shape: BoxShape.circle,
               ),
+              child: _error != null
+                  ? const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 36)
+                  : const Icon(Icons.cloud_upload_outlined, color: AppColors.cyanGlow, size: 36),
             ),
-          )
-        else if (_isGridView)
-          SliverPadding(
-            padding: const EdgeInsets.all(12),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+            const SizedBox(height: 16),
+            Text(
+              _error != null ? 'Upload Error' : _status,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: _error != null
+                    ? AppColors.error
+                    : (widget.isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => DocumentCard(
-                  document: docs[index],
-                  onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => DocumentViewerScreen(document: docs[index]))); },
-                  onLongPress: () => _showDocumentOptions(docs[index]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            if (_error == null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: _progress,
+                  minHeight: 6,
+                  color: AppColors.cyanGlow,
+                  backgroundColor: widget.isDark ? Colors.white12 : Colors.black12,
                 ),
-                childCount: docs.length,
               ),
-            ),
-          )
-        else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => ListTile(
-                leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
-                title: Text(docs[index].title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text('${docs[index].pageCount} pages · ${docs[index].fileSizeFormatted}'),
-                onTap: () { Navigator.push(context, MaterialPageRoute(builder: (_) => DocumentViewerScreen(document: docs[index]))); },
-                onLongPress: () => _showDocumentOptions(docs[index]),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Dismiss'),
               ),
-              childCount: docs.length,
-            ),
-          ),
-        const SliverToBoxAdapter(child: SizedBox(height: 80)),
-      ],
-    );
-  }
-
-  void _showDocumentOptions(Document doc) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.folder),
-              title: const Text('Move to folder'),
-              onTap: () {
-                Navigator.pop(context);
-                _showMoveToFolderDialog(doc);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.error),
-              title: const Text('Delete', style: TextStyle(color: AppColors.error)),
-              onTap: () async {
-                Navigator.pop(context);
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => ConfirmDialog(
-                    title: 'Delete Document',
-                    message: 'Delete ${doc.title}?',
-                    confirmLabel: 'Delete',
-                    isDestructive: true,
-                  ),
-                );
-                if (confirmed == true) {
-                  ref.read(dashboardProvider.notifier).deleteDocument(doc.id);
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showMoveToFolderDialog(Document doc) {
-    final folders = ref.read(folderProvider);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Move to folder'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.folder_off),
-                title: const Text('No folder'),
-                onTap: () {
-                  ref.read(dashboardProvider.notifier).moveToFolder(doc.id, null);
-                  Navigator.pop(context);
-                },
-              ),
-              ...folders.map((folder) => ListTile(
-                    leading: const Icon(Icons.folder),
-                    title: Text(folder.name),
-                    onTap: () {
-                      ref.read(dashboardProvider.notifier).moveToFolder(doc.id, folder.id);
-                      Navigator.pop(context);
-                    },
-                  )),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showFolderOptions(Folder folder) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Rename'),
-              onTap: () {
-                Navigator.pop(context);
-                _showRenameFolderDialog(folder);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.error),
-              title: const Text('Delete', style: TextStyle(color: AppColors.error)),
-              onTap: () async {
-                Navigator.pop(context);
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => ConfirmDialog(
-                    title: 'Delete Folder',
-                    message: 'Delete ${folder.name}? Documents will not be deleted.',
-                    confirmLabel: 'Delete',
-                    isDestructive: true,
-                  ),
-                );
-                if (confirmed == true) {
-                  ref.read(folderProvider.notifier).deleteFolder(folder.id);
-                  ref.read(dashboardProvider.notifier).setFolder(null);
-                }
-              },
-            ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showRenameFolderDialog(Folder folder) {
-    final controller = TextEditingController(text: folder.name);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename Folder'),
-        content: AppTextField(controller: controller, label: 'Folder Name'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                ref.read(folderProvider.notifier).renameFolder(folder.id, controller.text.trim());
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Rename'),
-          ),
-        ],
       ),
     );
   }

@@ -29,11 +29,18 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(top: BorderSide(color: AppColors.lightTextTertiary.withAlpha(50))),
+        color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurface,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+            width: 1,
+          ),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -45,25 +52,78 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 maxLines: null,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _handleSend(),
+                style: TextStyle(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 14,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Ask about this document...',
-                  hintStyle: TextStyle(color: AppColors.lightTextTertiary),
+                  hintStyle: TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                    fontSize: 13,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.auto_awesome,
+                    size: 16,
+                    color: isDark ? AppColors.cyanGlow : AppColors.primary,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(
+                      color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(
+                      color: isDark ? AppColors.whisperBorder : AppColors.lightDivider,
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: const BorderSide(
+                      color: AppColors.cyanGlow,
+                      width: 1.5,
+                    ),
                   ),
                   filled: true,
-                  fillColor: AppColors.lightSurface,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  fillColor: isDark ? AppColors.darkSurface : AppColors.lightSurfaceVariant,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
-              onPressed: widget.isLoading ? null : _handleSend,
-              icon: widget.isLoading
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.send, color: AppColors.primary),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withAlpha(80),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                onPressed: widget.isLoading ? null : _handleSend,
+                icon: widget.isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.send, color: Colors.white, size: 18),
+              ),
             ),
           ],
         ),

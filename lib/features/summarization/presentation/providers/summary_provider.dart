@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mindspace/features/summarization/domain/entities/summary.dart';
-import 'package:mindspace/services/ai/nemotron_service.dart';
+import 'package:mindspace/services/ai/ai_service.dart';
+import 'package:mindspace/providers/ai_service_provider.dart';
 
 /// Summary state.
 class SummaryState {
@@ -27,11 +28,11 @@ class SummaryState {
 }
 
 /// Summary notifier managing summarization requests and caching.
-class SummaryNotifier extends Notifier<SummaryState> {
+class SummaryNotifier extends StateNotifier<SummaryState> {
+  final AIService _aiService;
   final Map<String, Summary> _cache = {};
 
-  @override
-  SummaryState build() => const SummaryState();
+  SummaryNotifier(this._aiService) : super(const SummaryState());
 
   Future<void> summarize({
     required String documentId,
@@ -55,9 +56,7 @@ class SummaryNotifier extends Notifier<SummaryState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      // Use mock in dev, real service in production
-      final aiService = MockAIService();
-      final content = await aiService.summarize(
+      final content = await _aiService.summarize(
         documentText: documentText,
         scope: scope,
         selectedText: selectedText,
@@ -92,6 +91,6 @@ class SummaryNotifier extends Notifier<SummaryState> {
   }
 }
 
-final summaryProvider = NotifierProvider<SummaryNotifier, SummaryState>(
-  SummaryNotifier.new,
-);
+final summaryProvider = StateNotifierProvider<SummaryNotifier, SummaryState>((ref) {
+  return SummaryNotifier(ref.read(aiServiceProvider));
+});
