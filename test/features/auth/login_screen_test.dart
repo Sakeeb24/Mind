@@ -52,10 +52,10 @@ void main() {
     expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
   });
 
-  testWidgets('LoginScreen renders email and password fields', (tester) async {
+  testWidgets('LoginScreen renders token input field', (tester) async {
     await tester.pumpWidget(buildTestApp());
     await tester.pumpAndSettle();
-    expect(find.byType(TextFormField), findsNWidgets(2));
+    expect(find.byType(TextFormField), findsOneWidget);
   });
 
   testWidgets('LoginScreen renders Sign In button', (tester) async {
@@ -64,10 +64,10 @@ void main() {
     expect(find.text('Sign In'), findsOneWidget);
   });
 
-  testWidgets('LoginScreen renders forgot password link', (tester) async {
+  testWidgets('LoginScreen renders get token link', (tester) async {
     await tester.pumpWidget(buildTestApp());
     await tester.pumpAndSettle();
-    expect(find.text('Forgot password\u2026'), findsOneWidget);
+    expect(find.text('Get token from puter.com \u2192'), findsOneWidget);
   });
 
   testWidgets('LoginScreen renders Sign Up link', (tester) async {

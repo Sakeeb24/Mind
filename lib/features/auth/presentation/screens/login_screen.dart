@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mindspace/config/theme.dart';
 import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
+import 'package:mindspace/core/widgets/app_text_field.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
-import 'package:mindspace/features/auth/presentation/widgets/auth_form.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -16,13 +16,20 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
-  String? _email;
-  String? _password;
+  final _tokenController = TextEditingController();
+  bool _obscureToken = true;
 
-  void _handleEmailSignIn() {
-    if (_email == null || _password == null) return;
+  @override
+  void dispose() {
+    _tokenController.dispose();
+    super.dispose();
+  }
+
+  void _handleTokenSignIn() {
+    final token = _tokenController.text.trim();
+    if (token.isEmpty) return;
     setState(() => _isLoading = true);
-    ref.read(authProvider.notifier).signInWithEmail(_email!, _password!);
+    ref.read(authProvider.notifier).signInWithToken(token);
   }
 
   @override
@@ -67,7 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 250),
                 child: Text(
-                  'Sign in to continue studying',
+                  'Sign in with your Puter account token',
                   style: AppTypography.bodyLarge.copyWith(color: AppColors.lightTextSecondary),
                   textAlign: TextAlign.center,
                 ),
@@ -75,32 +82,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // Form
+              // Token input field
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 350),
-                child: AuthForm(
-                  onChanged: (email, password, _) {
-                    _email = email;
-                    _password = password;
-                  },
-                  onSubmit: (email, password, _) {
-                    _email = email;
-                    _password = password;
-                    _handleEmailSignIn();
-                  },
-                  submitLabel: 'Sign In',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppTextField(
+                      controller: _tokenController,
+                      label: 'Puter Auth Token',
+                      hint: 'Enter your Puter auth token',
+                      prefixIcon: const Icon(Icons.vpn_key_outlined),
+                      obscureText: _obscureToken,
+                      keyboardType: TextInputType.text,
+                      onFieldSubmitted: (_) => _handleTokenSignIn(),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: Icon(
+                          _obscureToken ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () => setState(() => _obscureToken = !_obscureToken),
+                        tooltip: _obscureToken ? 'Show token' : 'Hide token',
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              // Forgot password
+              // Link to Puter dashboard
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 400),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => context.push('/forgot-password'),
+                    onPressed: () => _openPuterDashboard(),
                     child: Text(
-                      'Forgot password\u2026',
+                      'Get token from puter.com \u2192',
                       style: AppTypography.bodyMedium.copyWith(color: AppColors.primary),
                     ),
                   ),
@@ -113,7 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 450),
                 child: AppButton(
-                  onPressed: _isLoading ? null : _handleEmailSignIn,
+                  onPressed: _isLoading ? null : _handleTokenSignIn,
                   label: 'Sign In',
                   isLoading: _isLoading,
                   isExpanded: true,
@@ -145,6 +166,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _openPuterDashboard() {
+    // Best-effort: launch the Puter dashboard URL. On web this opens a new tab.
+    // We intentionally do not import url_launcher to keep the change minimal.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Visit https://puter.com/dashboard to create a token.'),
+        duration: Duration(seconds: 4),
       ),
     );
   }

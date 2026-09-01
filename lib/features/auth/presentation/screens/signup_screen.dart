@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mindspace/config/theme.dart';
 import 'package:mindspace/core/widgets/animated_fade_in.dart';
 import 'package:mindspace/core/widgets/app_button.dart';
+import 'package:mindspace/core/widgets/app_text_field.dart';
 import 'package:mindspace/features/auth/presentation/providers/auth_provider.dart';
-import 'package:mindspace/features/auth/presentation/widgets/auth_form.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -16,14 +16,20 @@ class SignupScreen extends ConsumerStatefulWidget {
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _isLoading = false;
-  String? _name;
-  String? _email;
-  String? _password;
+  final _tokenController = TextEditingController();
+  bool _obscureToken = true;
 
-  void _handleEmailSignUp() {
-    if (_email == null || _password == null) return;
+  @override
+  void dispose() {
+    _tokenController.dispose();
+    super.dispose();
+  }
+
+  void _handleTokenSignIn() {
+    final token = _tokenController.text.trim();
+    if (token.isEmpty) return;
     setState(() => _isLoading = true);
-    ref.read(authProvider.notifier).signUpWithEmail(_email!, _password!, displayName: _name);
+    ref.read(authProvider.notifier).signInWithToken(token);
   }
 
   @override
@@ -68,7 +74,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 250),
                 child: Text(
-                  'Start your free study assistant',
+                  'Create a Puter account, then sign in with your token',
                   style: AppTypography.bodyLarge.copyWith(color: AppColors.lightTextSecondary),
                   textAlign: TextAlign.center,
                 ),
@@ -76,21 +82,34 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // Form
+              // Token input field
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 350),
-                child: AuthForm(
-                  onChanged: (email, password, name) {
-                    _email = email;
-                    _password = password;
-                    _name = name;
-                  },
-                  onSubmit: (email, password, _) {
-                    _email = email;
-                    _password = password;
-                    _handleEmailSignUp();
-                  },
-                  submitLabel: 'Create Account',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppTextField(
+                      controller: _tokenController,
+                      label: 'Puter Auth Token',
+                      hint: 'Enter your Puter auth token',
+                      prefixIcon: const Icon(Icons.vpn_key_outlined),
+                      obscureText: _obscureToken,
+                      keyboardType: TextInputType.text,
+                      onFieldSubmitted: (_) => _handleTokenSignIn(),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: Icon(
+                          _obscureToken ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () => setState(() => _obscureToken = !_obscureToken),
+                        tooltip: _obscureToken ? 'Show token' : 'Hide token',
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -100,8 +119,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 450),
                 child: AppButton(
-                  onPressed: _isLoading ? null : _handleEmailSignUp,
-                  label: 'Create Account',
+                  onPressed: _isLoading ? null : _handleTokenSignIn,
+                  label: 'Sign In',
                   isLoading: _isLoading,
                   isExpanded: true,
                 ),
@@ -109,7 +128,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Sign in link
+              // Back to sign in link
               AnimatedFadeIn(
                 delay: const Duration(milliseconds: 500),
                 child: Row(
